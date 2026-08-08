@@ -1,90 +1,65 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
-const Database = require('better-sqlite3');
 const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
-const DB_PATH = path.join(__dirname, 'tadbeer.db');
+const DATA_FILE = path.join(__dirname, 'data.json');
 
-// --- إعدادات قاعدة البيانات ---
-const db = new Database(DB_PATH);
-db.exec(`
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    email TEXT UNIQUE NOT NULL,
-    phone TEXT,
-    role TEXT DEFAULT 'customer',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  );
-  CREATE TABLE IF NOT EXISTS service_requests (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    service_type TEXT NOT NULL,
-    description TEXT,
-    status TEXT DEFAULT 'pending',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-  );
-  CREATE TABLE IF NOT EXISTS contacts (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    email TEXT,
-    phone TEXT,
-    message TEXT NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  );
-`);
+if (!fs.existsSync(DATA_FILE)) {
+    fs.writeFileSync(DATA_FILE, JSON.stringify({ users: [], requests: [], contacts: [] }));
+}
 
 app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// --- API لخدمة الملفات المخزنة (Mock API) ---
-app.get('/api/:port/*', (req, res) => {
-    const { port } = req.params;
-    const filePath = req.params[0];
-    const fullPath = path.join(__dirname, 'api', port, 'api', filePath);
+// معالجة يدوية لكافة طلبات الـ API
+app.use('/api', (req, res, next) => {
+    // إذا كان الطلب POST لإنشاء مستخدم أو طلب، نمرره للمرحلة التالية
+    if (req.method === 'POST') return next();
+
+    // استخراج المنفذ والمسار من URL
+    // URL format: /8002/api/content/Search/en/homePage.html
+    const parts = req.path.split('/').filter(p => p);
+    if (parts.length < 1) return res.status(404).send('Not Found');
+
+    const port = parts[0];
+    const rest = parts.slice(1).join('/');
     
-    // محاولة البحث عن الملف بملحق .html أو بدون
-    const pathsToTry = [
-        fullPath,
-        fullPath + '.html',
-        path.join(__dirname, 'api', port, filePath),
-        path.join(__dirname, 'api', port, filePath + '.html')
+    const possiblePaths = [
+        path.join(__dirname, 'api', port, 'api', rest),
+        path.join(__dirname, 'api', port, 'api', rest + '.html'),
+        path.join(__dirname, 'api', port, rest),
+        path.join(__dirname, 'api', port, rest + '.html')
     ];
 
-    for (const p of pathsToTry) {
+    for (const p of possiblePaths) {
         if (fs.existsSync(p) && fs.lstatSync(p).isFile()) {
             return res.sendFile(p);
         }
     }
     
-    res.status(404).json({ error: 'Not Found in cache', path: filePath });
+    res.status(404).json({ error: 'Not Found in cache', port, path: rest });
 });
 
-// --- API ديناميكي لقاعدة البيانات ---
 app.post('/api/users', (req, res) => {
-    const { name, email, phone } = req.body;
-    try {
-        const stmt = db.prepare('INSERT INTO users (name, email, phone) VALUES (?, ?, ?)');
-        const result = stmt.run(name, email, phone);
-        res.status(201).json({ id: result.lastInsertRowid, name, email });
-    } catch (e) {
-        res.status(400).json({ error: e.message });
-    }
+    const data = JSON.parse(fs.readFileSync(DATA_FILE));
+    const newUser = { id: data.users.length + 1, ...req.body, created_at: new Date() };
+    data.users.push(newUser);
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+    res.status(201).json(newUser);
 });
 
 app.post('/api/requests', (req, res) => {
-    const { user_id, service_type, description } = req.body;
-    const stmt = db.prepare('INSERT INTO service_requests (user_id, service_type, description) VALUES (?, ?, ?)');
-    const result = stmt.run(user_id, service_type, description);
-    res.status(201).json({ id: result.lastInsertRowid });
+    const data = JSON.parse(fs.readFileSync(DATA_FILE));
+    const newRequest = { id: data.requests.length + 1, ...req.body, status: 'pending', created_at: new Date() };
+    data.requests.push(newRequest);
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+    res.status(201).json(newRequest);
 });
 
-// --- نظام الـ SPA Routing ---
 app.get(/^((?!\.).)*$/, (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
