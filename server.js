@@ -122,6 +122,10 @@ async function initDb() {
 
 initDb();
 
+// ضغط gzip لتحسين أداء النقل (يجب تسجيله قبل static)
+const compression = (() => { try { return require('compression'); } catch (e) { return null; } })();
+if (compression) app.use(compression());
+
 // ملفات ثابتة
 app.use(express.static(__dirname, { maxAge: '1d' }));
 
