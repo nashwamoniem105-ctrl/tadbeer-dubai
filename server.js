@@ -13,16 +13,20 @@ if (!fs.existsSync(DATA_FILE)) {
 
 app.use(cors());
 app.use(express.json());
+
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    next();
+});
+
 app.use(express.static(__dirname));
 
-// معالجة يدوية لكافة طلبات الـ API
 app.use('/api', (req, res, next) => {
-    // إذا كان الطلب POST لإنشاء مستخدم أو طلب، نمرره للمرحلة التالية
     if (req.method === 'POST') return next();
 
-    // استخراج المنفذ والمسار من URL
-    // URL format: /8002/api/content/Search/en/homePage.html
-    const parts = req.path.split('/').filter(p => p);
+    // إزالة Query String من المسار
+    const urlPath = req.path.split('?')[0];
+    const parts = urlPath.split('/').filter(p => p);
     if (parts.length < 1) return res.status(404).send('Not Found');
 
     const port = parts[0];
@@ -41,6 +45,7 @@ app.use('/api', (req, res, next) => {
         }
     }
     
+    console.log(`API Cache Miss: port=${port}, path=${rest}`);
     res.status(404).json({ error: 'Not Found in cache', port, path: rest });
 });
 
@@ -52,16 +57,8 @@ app.post('/api/users', (req, res) => {
     res.status(201).json(newUser);
 });
 
-app.post('/api/requests', (req, res) => {
-    const data = JSON.parse(fs.readFileSync(DATA_FILE));
-    const newRequest = { id: data.requests.length + 1, ...req.body, status: 'pending', created_at: new Date() };
-    data.requests.push(newRequest);
-    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
-    res.status(201).json(newRequest);
-});
-
 app.get(/^((?!\.).)*$/, (req, res) => {
-    res.sendFile(path.join(__dirname, 'home.html'));
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.listen(PORT, '0.0.0.0', () => {
