@@ -1,15 +1,14 @@
 {
   "dependencies": {
-    "better-sqlite3": "^13.0.3",
     "cors": "^2.8.6",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "pg": "^8.22.0"
   },
   "name": "tadbeer_github",
   "version": "1.0.0",
   "description": "موقع شركة تدبير للاستقدام - النسخة الكاملة (العربية والإنجليزية).",
-  "main": "main.1c3d9c9b78f85f28.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
   "repository": {
