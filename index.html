@@ -25,21 +25,23 @@
 
     <base href="/">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- سكربت ضبط اللغة حسب المسار: /en إنجليزية، و/ar وكل ما عداه عربيًا — يمنع تداخل اللغتين -->
+    <!-- سكربت ضبط اللغة: المسار /en يفرض الإنجليزية، والمسار الافتراضي يتبع تفضيل المستخدم المحفوظ (يسمح لزر تبديل اللغة بالعمل) -->
     <script>
       (function () {
         var path = (window.location.pathname || '/').toLowerCase().split('?')[0];
-        var forced = null;
-        if (path.indexOf('/en') === 0) { forced = 'en'; }
-        else { forced = 'ar'; }
-        try {
-          if (localStorage.getItem('lang') !== forced) {
-            localStorage.setItem('lang', forced);
-          }
-        } catch (e) {}
+        var lang = null;
+        if (path.indexOf('/en') === 0) {
+          lang = 'en';
+          try { localStorage.setItem('lang', 'en'); } catch (e) {}
+        } else {
+          try {
+            var saved = localStorage.getItem('lang');
+            lang = (saved === 'ar' || saved === 'en') ? saved : 'ar';
+          } catch (e) { lang = 'ar'; }
+        }
         var htmlTag = document.getElementsByTagName('html')[0];
         if (htmlTag) {
-          if (forced === 'en') { htmlTag.lang = 'en'; htmlTag.dir = 'ltr'; }
+          if (lang === 'en') { htmlTag.lang = 'en'; htmlTag.dir = 'ltr'; }
           else { htmlTag.lang = 'ar'; htmlTag.dir = 'rtl'; }
         }
       })();
