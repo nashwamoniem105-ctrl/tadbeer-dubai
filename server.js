@@ -122,7 +122,7 @@ async function insertRecord(table, row) {
     } else {
         const cols = Object.keys(row);
         const vals = Object.values(row);
-        await db.query(`INSERT INTO ${table} (${cols.map((c) => `"${c}"`).join(',')}) VALUES (${cols.map(() => '$' + (vals.indexOf(vals[0]) + 1)).join(',')})`, vals);
+        await db.query(`INSERT INTO ${table} (${cols.map((c) => `"${c}"`).join(',')}) VALUES (${vals.map((_, i) => '$' + (i + 1)).join(',')})`, vals);
         return { success: true, table };
     }
 }
