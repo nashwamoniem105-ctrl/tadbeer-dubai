@@ -74,6 +74,13 @@ async function initDb() {
                     subject TEXT, message TEXT,
                     created_at TEXT DEFAULT (datetime('now'))
                 );
+                CREATE TABLE IF NOT EXISTS leads (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    full_name TEXT, phone TEXT, email TEXT, city TEXT,
+                    message TEXT, source TEXT DEFAULT 'web', status TEXT DEFAULT 'new',
+                    contract_no TEXT,
+                    created_at TEXT DEFAULT (datetime('now'))
+                );
             `);
             console.log('DB tables ensured');
         } else {
@@ -98,6 +105,13 @@ async function initDb() {
                     subject TEXT, message TEXT,
                     created_at TIMESTAMPTZ DEFAULT now()
                 );
+                CREATE TABLE IF NOT EXISTS leads (
+                    id SERIAL PRIMARY KEY,
+                    full_name TEXT, phone TEXT, email TEXT, city TEXT,
+                    message TEXT, source TEXT DEFAULT 'web', status TEXT DEFAULT 'new',
+                    contract_no TEXT,
+                    created_at TIMESTAMPTZ DEFAULT now()
+                );
             `);
             console.log('PostgreSQL tables ensured');
         }
@@ -110,6 +124,17 @@ initDb();
 
 // ملفات ثابتة
 app.use(express.static(__dirname, { maxAge: '1d' }));
+
+// إعادة كتابة مسارات /en/xxx إلى ملفات en-xxx.html
+app.get(/^\/en\/(.+\.html)$/i, (req, res, next) => {
+    const file = path.join(__dirname, 'en-' + req.params[0]);
+    try {
+        require('fs').accessSync(file);
+        return res.sendFile(file);
+    } catch (e) {
+        next();
+    }
+});
 
 // نقاط الحفظ في قاعدة البيانات
 async function insertRecord(table, row) {
@@ -126,6 +151,52 @@ async function insertRecord(table, row) {
         return { success: true, table };
     }
 }
+
+// تسلسل الطلب: order pages → customer-info → /api/leads → payment
+app.post('/api/leads', async (req, res) => {
+    try {
+        let id;
+        if (db && typeof db.prepare !== 'function') {
+            const b = req.body || {};
+            const r = await db.query(
+                `INSERT INTO leads (full_name, phone, email, city, message, source, status, contract_no)
+                 VALUES ($1, $2, $3, $4, $5, $6, 'new', $7) RETURNING id, created_at`,
+                [b.full_name || b.name || null, b.phone || null, b.email || null, b.city || null, b.message || null, b.source || 'web', b.contract_no || b.contractNo || null]
+            );
+            id = r.rows[0].id;
+        } else if (db) {
+            const b = req.body || {};
+            const r = db.prepare(
+                `INSERT INTO leads (full_name, phone, email, city, message, source, status, contract_no)
+                 VALUES (?, ?, ?, ?, ?, 'new', ?)`
+            ).run(b.full_name || b.name || null, b.phone || null, b.email || null, b.city || null, b.message || null, b.contract_no || b.contractNo || null);
+            id = r.lastInsertRowid;
+        } else {
+            id = 'offline';
+        }
+        res.json({ success: true, data: { id, ...(req.body || {}), status: 'new', created_at: new Date().toISOString() } });
+    } catch (e) {
+        console.error('leads error:', e.message);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.get('/api/leads', async (req, res) => {
+    try {
+        let rows;
+        if (db && typeof db.prepare !== 'function') {
+            const r = await db.query(`SELECT * FROM leads ORDER BY id DESC LIMIT 200`);
+            rows = r.rows;
+        } else if (db) {
+            rows = db.prepare(`SELECT * FROM leads ORDER BY id DESC LIMIT 200`).all();
+        } else {
+            rows = [];
+        }
+        res.json(rows);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
 
 app.post('/api/db/:table', async (req, res) => {
     const { table } = req.params;

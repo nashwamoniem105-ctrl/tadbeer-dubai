@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>معلومات العميل - شركة تدبير</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;900&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="media/kv4pfeid/logo-website-10-4.png">
+    <style>
+        :root {
+            --primary: #152650;
+            --accent: #78182b;
+            --background: #fefbf8;
+            --foreground: #0b152c;
+            --border: #d9dee8;
+            --card: #ffffff;
+            --success: #16a34a;
+        }
+        body {
+            font-family: 'Tajawal', 'Cairo', sans-serif;
+            background-color: var(--background);
+            color: var(--foreground);
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        .tadbeer-header {
+            background: white;
+            padding: 0 1.5rem;
+            height: 80px;
+            border-bottom: 1px solid rgba(217, 222, 232, 0.6);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.85);
+        }
+        .tadbeer-logo img { height: 36px; width: auto; }
+        @media (max-width: 640px) { .tadbeer-logo img { height: 28px; } }
+        .back-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .hero-section {
+            background: linear-gradient(135deg, #f5f7fa 0%, #fefbf8 100%);
+            border-bottom: 1px solid rgba(217, 222, 232, 0.6);
+            padding: 2.5rem 1.5rem;
+        }
+        .gradient-hero-text {
+            background: linear-gradient(to right, #152650, #78182b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            white-space: nowrap;
+        }
+        .page-wrapper { padding: 3rem 1.5rem; }
+        .inner-grid {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            gap: 2.5rem;
+            grid-template-columns: 1fr;
+        }
+        @media (min-width: 1024px) {
+            .inner-grid { grid-template-columns: 1fr 420px; align-items: start; }
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 10px 30px -15px rgba(10, 24, 59, 0.15);
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            margin-bottom: 1.75rem;
+        }
+        .header-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 0.85rem;
+            background: linear-gradient(135deg, #152650 0%, #2a3d66 100%);
+            color: white;
+            display: grid;
+            place-items: center;
+            font-weight: 900;
+        }
+        .card-header h2 { margin: 0; font-size: 1.4rem; font-weight: 900; color: var(--primary); }
+
+        /* Summary card */
+        .summary-list { margin: 0; padding: 0; list-style: none; }
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.9rem 0;
+            border-bottom: 1px solid #f1f3f7;
+        }
+        .summary-item:last-child { border-bottom: none; }
+        .summary-item .label { color: #5b6472; font-weight: 600; }
+        .summary-item .value { font-weight: 800; color: var(--primary); text-align: left; }
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1.25rem;
+            padding-top: 1.25rem;
+            border-top: 2px dashed var(--border);
+        }
+        .summary-total .label { font-size: 1.1rem; font-weight: 800; color: var(--primary); }
+        .summary-total .value { font-size: 1.6rem; font-weight: 900; color: var(--accent); }
+        .badge-row { margin-top: 1.25rem; }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #eefbf3;
+            color: var(--success);
+            border: 1px solid #bfe7cf;
+            border-radius: 999px;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 800;
+        }
+
+        /* Form */
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label {
+            display: block;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+        .form-group label .req { color: var(--accent); }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.9rem 1.1rem;
+            border: 2px solid var(--border);
+            border-radius: 1rem;
+            font-family: inherit;
+            font-size: 1rem;
+            color: var(--foreground);
+            background: #fbfcfd;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-sizing: border-box;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(120, 24, 43, 0.1);
+            background: white;
+        }
+        .form-group input::placeholder { color: #9aa3b2; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+        @media (max-width: 640px) { .form-row { grid-template-columns: 1fr; } }
+
+        .section-subtitle {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-weight: 900;
+            color: var(--primary);
+            font-size: 1.1rem;
+            margin: 1.75rem 0 1rem;
+            padding-top: 0.5rem;
+        }
+        .section-subtitle::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            border-radius: 4px;
+            background: var(--accent);
+        }
+        .section-subtitle:first-of-type { margin-top: 0; }
+
+        .submit-btn {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+            padding: 1.05rem;
+            border-radius: 1rem;
+            font-weight: 800;
+            font-size: 1.05rem;
+            font-family: inherit;
+            border: none;
+            cursor: pointer;
+            margin-top: 1.75rem;
+            transition: all 0.2s;
+        }
+        .submit-btn:hover { background: var(--accent); transform: scale(1.02); }
+        .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        /* Success state */
+        .success-overlay {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #eefbf3;
+            display: grid;
+            place-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .success-overlay h2 { color: var(--success); font-size: 1.6rem; margin: 0 0 0.75rem; }
+        .success-overlay p { color: #5b6472; max-width: 420px; line-height: 1.7; }
+        .home-btn {
+            margin-top: 2rem;
+            background: var(--primary);
+            color: white;
+            padding: 0.9rem 2.5rem;
+            border-radius: 1rem;
+            font-weight: 800;
+            font-family: inherit;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .home-btn:hover { background: var(--accent); }
+        .error-text { color: var(--accent); font-weight: 700; font-size: 0.9rem; margin-top: 0.5rem; display: none; }
+
+        /* ===== Smart Contract ===== */
+        .contract-header { margin-top: 0.25rem; }
+        .contract-rule { height: 3px; background: var(--primary); border-radius: 2px; margin-bottom: 0.75rem; }
+        .contract-title {
+            text-align: center; margin: 0 0 0.1rem;
+            font-size: 1.2rem; font-weight: 900; color: var(--primary);
+        }
+        .contract-title-en {
+            text-align: center; margin: 0 0 0.75rem;
+            font-size: 0.85rem; font-weight: 800; color: #45516b; letter-spacing: 0.02em;
+        }
+        .contract-meta {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;
+            background: #f4f6f9; border: 1px solid var(--border); border-radius: 1rem;
+            padding: 0.65rem 1rem; margin-bottom: 0.75rem;
+        }
+        .contract-meta-label { display: block; font-size: 0.78rem; font-weight: 700; color: #5b6472; margin-bottom: 0.2rem; }
+        .contract-meta-value { display: block; font-size: 1rem; font-weight: 900; color: var(--primary); }
+
+        .contract-party {
+            border: 1.5px solid #c3cbd8; border-radius: 1rem; margin-bottom: 0.75rem;
+            background: #fcfdfe; overflow: hidden;
+        }
+        .contract-party-head {
+            background: #e8ebf2; padding: 0.45rem 1rem;
+            font-weight: 800; color: var(--primary); font-size: 0.88rem;
+            border-bottom: 1px solid #c3cbd8;
+        }
+        .contract-fields {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+        }
+        .contract-field {
+            display: flex; flex-direction: column; gap: 0.15rem;
+            padding: 0.5rem 0.85rem; border-bottom: 1px solid #edf0f4;
+        }
+        .contract-field:nth-child(3n+1) { border-left: 1px solid #edf0f4; }
+        .cf-label { font-size: 0.78rem; font-weight: 700; color: #5b6472; }
+        .cf-value { font-size: 0.95rem; font-weight: 800; color: var(--foreground); }
+        @media (max-width: 760px) {
+            .contract-fields { grid-template-columns: 1fr 1fr; }
+            .contract-field:nth-child(3n+1) { border-left: none; }
+            .contract-field:nth-child(odd) { border-left: 1px solid #edf0f4; }
+        }
+        @media (max-width: 520px) {
+            .contract-fields { grid-template-columns: 1fr; }
+            .contract-field { border-left: none !important; }
+        }
+
+        .contract-terms {
+            border: 1.5px solid #c3cbd8; border-radius: 1rem;
+            background: #fcfdfe; padding: 0.85rem 1rem;
+        }
+        .contract-terms-head { font-weight: 800; color: var(--primary); font-size: 0.92rem; margin-bottom: 0.4rem; }
+        .contract-terms-list { margin: 0; padding: 0 0.9rem; }
+        .contract-terms-list li {
+            font-size: 0.84rem; line-height: 1.6; color: #333d52; margin-bottom: 0.2rem;
+        }
+        .contract-signatures {
+            display: grid; grid-template-columns: 1fr auto 1fr; align-items: end;
+            gap: 0.75rem; margin-top: 0.9rem;
+        }
+        .contract-sign-label { text-align: center; font-weight: 800; color: var(--primary); font-size: 0.85rem; margin-bottom: 1.5rem; }
+        .contract-sign-line { border-bottom: 1.5px solid #333d52; margin: 0 0.5rem; }
+        .contract-director { text-align: center; font-size: 0.8rem; color: #45516b; font-weight: 700; margin-top: 0.4rem; }
+        .contract-stamp {
+            width: 72px; height: 72px; border-radius: 50%;
+            border: 2.5px dashed #78182b; color: #78182b;
+            display: grid; place-items: center; text-align: center;
+            font-size: 0.72rem; font-weight: 800; line-height: 1.3;
+            background: rgba(120,24,43,0.04);
+        }
+        @media (max-width: 640px) { .contract-signatures { grid-template-columns: 1fr; } }
+
+        /* ===== Compact contract card ===== */
+        .compact-contract {
+            display: grid; grid-template-columns: auto 1fr; gap: 0.9rem;
+            background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
+            border: 1.5px solid #c3cbd8; border-radius: 1.1rem; padding: 0.95rem 1.1rem;
+            position: relative; overflow: hidden;
+        }
+        .compact-contract::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, #152650 0%, #78182b 100%);
+        }
+        .compact-contract > .compact-logo { grid-column: 1; grid-row: 1 / span 2; align-self: center; }
+        .compact-top { display: flex; align-items: center; gap: 0.75rem; }
+        .compact-logo { width: 44px; height: 44px; object-fit: contain; }
+        .compact-title { font-size: 0.95rem; font-weight: 900; color: var(--primary); line-height: 1.35; }
+        .compact-title-en { font-size: 0.72rem; font-weight: 700; color: #5b6472; letter-spacing: 0.02em; }
+        .compact-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem 1rem; }
+        .compact-meta-label { display: block; font-size: 0.66rem; font-weight: 700; color: #5b6472; }
+        .compact-meta b { display: block; font-size: 0.85rem; font-weight: 900; color: var(--foreground); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .compact-actions { grid-column: 1 / span 2; display: flex; gap: 0.6rem; margin-top: 0.1rem; }
+        .compact-btn {
+            flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+            padding: 0.5rem 0.75rem; border-radius: 0.7rem; font-weight: 800; font-size: 0.82rem;
+            font-family: inherit; cursor: pointer; border: none; transition: all 0.2s;
+        }
+        .compact-btn-view { background: var(--primary); color: #fff; }
+        .compact-btn-view:hover { background: #1e3669; }
+        .compact-btn-download { background: #fff; color: var(--primary); border: 1.5px solid var(--primary); }
+        .compact-btn-download:hover { background: #f0f3fa; }
+        @media (max-width: 640px) {
+            .compact-contract { grid-template-columns: 1fr; gap: 0.55rem; padding: 0.7rem 0.85rem; }
+            .compact-contract > .compact-logo { display: none; }
+            .compact-meta { grid-template-columns: repeat(3, 1fr); gap: 0.45rem 0.6rem; }
+            .compact-meta-label { font-size: 0.58rem; }
+            .compact-meta b { font-size: 0.72rem; }
+            .compact-actions { grid-column: 1; display: flex; gap: 0.5rem; margin-top: 0.1rem; }
+            .compact-btn { padding: 0.45rem 0.5rem; font-size: 0.75rem; }
+        }
+
+        /* ===== Contract modal ===== */
+        .contract-modal-overlay {
+            position: fixed; inset: 0; background: rgba(11,21,44,0.65); z-index: 2000;
+            display: flex; align-items: center; justify-content: center; padding: 1rem;
+        }
+        .contract-modal {
+            background: var(--card); border-radius: 1.25rem; width: 100%; max-width: 820px;
+            max-height: 92vh; display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: 0 25px 60px -12px rgba(11,21,44,0.45);
+        }
+        .contract-modal-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.85rem 1.25rem; background: var(--primary); color: #fff; flex: 0;
+        }
+        .contract-modal-title { font-weight: 900; font-size: 1rem; }
+        .contract-modal-close {
+            background: rgba(255,255,255,0.15); color: #fff; border: none; border-radius: 50%;
+            width: 34px; height: 34px; font-size: 1rem; cursor: pointer;
+        }
+        .contract-modal-body { flex: 1; overflow-y: auto; padding: 1.75rem; }
+        .contract-modal-actions { display: flex; gap: 0.75rem; padding: 1rem 1.25rem; border-top: 1px solid var(--border); flex: 0; }
+        .contract-header-logo { width: 52px; height: 52px; object-fit: contain; margin: 0 auto 0.4rem; display: block; }
+    </style>
+    <link rel="stylesheet" href="/custom-styles.css">
+</head>
+<body>
+    <header class="tadbeer-header">
+        <div class="tadbeer-logo">
+            <a href="/home"><img src="media/kv4pfeid/logo-website-10-4.png" alt="تدبير"></a>
+        </div>
+        <a href="javascript:history.back()" class="back-link">
+            الرجوع
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+        </a>
+    </header>
+
+    <section class="hero-section">
+        <div style="max-width:1100px; margin:0 auto;">
+            <h1 class="mt-4 text-3xl font-black leading-tight" style="color:var(--primary); margin:1.25rem 0 0.5rem; font-size:2.1rem;">معلومات <span class="gradient-hero-text">العميل</span></h1>
+            <p style="margin:0; color:#5b6472; font-size:1.05rem;">راجع ملخص حجزك أدناه، ثم أدخل بياناتك وعنوانك لإكمال الحجز.</p>
+        </div>
+    </section>
+
+    <div class="page-wrapper">
+        <div class="inner-grid">
+            <!-- Booking Summary -->
+            <div>
+                <!-- Compact contract card -->
+                <div class="card" id="summary-card">
+                    <div class="compact-contract">
+                        <img src="media/kv4pfeid/logo-website-10-4.png" alt="تدبير" class="compact-logo">
+                        <div class="compact-title">
+                            <div>عقد خدمات العمالة المساعدة</div>
+                            <div class="compact-title-en">Domestic Work Service Agreement</div>
+                        </div>
+                        <div class="compact-meta" id="cn-meta-grid">
+                            <div id="cn-meta-date"><span class="compact-meta-label">التاريخ / DATE</span><b id="cn-date">—</b></div>
+                            <div id="cn-meta-number"><span class="compact-meta-label">رقم العقد / CONTRACT No</span><b id="cn-number">—</b></div>
+                            <div id="cn-meta-name"><span class="compact-meta-label">الطرف الأول / First Party</span><b id="cn-name">—</b></div>
+                            <div id="cn-meta-service"><span class="compact-meta-label">الخدمة / Service</span><b id="cn-service">—</b></div>
+                            <div id="cn-meta-workers"><span class="compact-meta-label">العمالة / Workers</span><b id="cn-workers">—</b></div>
+                            <div id="cn-meta-total"><span class="compact-meta-label">المبلغ الإجمالي / Total</span><b id="cn-total">—</b></div>
+                        </div>
+                        <div class="compact-actions">
+                            <button type="button" class="compact-btn compact-btn-view" id="btn-view-contract" title="عرض العقد">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                <span>عرض العقد</span>
+                            </button>
+                            <button type="button" class="compact-btn compact-btn-download" id="btn-download-contract" title="تحميل العقد PDF">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                <span>تحميل PDF</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Full contract (hidden, used for modal preview and PDF generation) -->
+                <div id="full-contract" class="contract-full" style="display:none;">
+                    <div class="contract-page" id="contract-page">
+                        <div class="contract-header">
+                            <div class="contract-rule"></div>
+                            <img src="media/kv4pfeid/logo-website-10-4.png" alt="TADBEER" class="contract-header-logo">
+                            <h3 class="contract-title">عقد خدمات العمالة المساعدة</h3>
+                            <div class="contract-title-en">Domestic Work Service Agreement</div>
+                            <div class="contract-meta">
+                                <div class="contract-meta-cell"><span class="contract-meta-label">التاريخ / DATE</span><span class="contract-meta-value" id="fc-date">—</span></div>
+                                <div class="contract-meta-cell"><span class="contract-meta-label">رقم العقد / CONTRACT No</span><span class="contract-meta-value" id="fc-number">—</span></div>
+                            </div>
+                        </div>
+
+                        <div class="contract-party" style="margin-top:1.25rem;">
+                            <div class="contract-party-head">الطرف الأول (صاحب العمل) <span style="font-weight:400; font-size:0.85em;">First Party (Employer)</span></div>
+                            <div class="contract-fields">
+                                <div class="contract-field"><span class="cf-label">الاسم الكامل / Full Name</span><b class="cf-value" id="fc-name">—</b></div>
+                                <div class="contract-field"><span class="cf-label">رقم الهاتف / Mobile No</span><b class="cf-value" id="fc-phone">—</b></div>
+                                <div class="contract-field"><span class="cf-label">البريد الإلكتروني / Email</span><b class="cf-value" id="fc-email">—</b></div>
+                                <div class="contract-field"><span class="cf-label">العنوان / Address</span><b class="cf-value" id="fc-address">—</b></div>
+                            </div>
+                        </div>
+
+                        <div class="contract-party">
+                            <div class="contract-party-head">الطرف الثاني (المركز) <span style="font-weight:400; font-size:0.85em;">Second Party (Center)</span></div>
+                            <div class="contract-fields">
+                                <div class="contract-field"><span class="cf-label">اسم المركز / Centre Name</span><b class="cf-value">مركز تدبير للخدمات (TADBEER)</b></div>
+                                <div class="contract-field"><span class="cf-label">الهاتف / Contact</span><b class="cf-value">359987155 971+</b></div>
+                            </div>
+                        </div>
+
+                        <div class="contract-party">
+                            <div class="contract-party-head">الطرف الثالث (العمالة) <span style="font-weight:400; font-size:0.85em;">Third Party (Worker)</span></div>
+                            <div class="contract-fields">
+                                <div class="contract-field"><span class="cf-label">نوع الخدمة / Service Type</span><b class="cf-value" id="fc-service-type">—</b></div>
+                                <div class="contract-field"><span class="cf-label">الخدمة / Service</span><b class="cf-value" id="fc-service">—</b></div>
+                                <div class="contract-field"><span class="cf-label">عدد العمالة / Workers</span><b class="cf-value" id="fc-workers">—</b></div>
+                                <div class="contract-field"><span class="cf-label">الجنسية / Nationality</span><b class="cf-value" id="fc-nationality">—</b></div>
+                                <div class="contract-field"><span class="cf-label">تاريخ بدء الخدمة / Start Date</span><b class="cf-value" id="fc-start">—</b></div>
+                                <div class="contract-field" id="fc-row-time"><span class="cf-label">وقت بدء الخدمة / Start Time</span><b class="cf-value" id="fc-time">—</b></div>
+                            </div>
+                        </div>
+
+                        <div class="contract-party">
+                            <div class="contract-party-head">تفاصيل القيمة <span style="font-weight:400; font-size:0.85em;">Value Details</span></div>
+                            <div class="contract-fields">
+                                <div class="contract-field" id="fc-row-duration"><span class="cf-label">المدة / Duration</span><b class="cf-value" id="fc-duration">—</b></div>
+                                <div class="contract-field" id="fc-row-type" style="display:none;"><span class="cf-label">نوع الدوام / Work Pattern</span><b class="cf-value" id="fc-type">—</b></div>
+                                <div class="contract-field"><span class="cf-label">سعر الوحدة / Unit Price</span><b class="cf-value" id="fc-price">—</b></div>
+                                <div class="contract-field" id="fc-row-total"><span class="cf-label">المبلغ الإجمالي / Total</span><b class="cf-value" id="fc-total">—</b></div>
+                                <div class="contract-field" id="fc-row-fee" style="display:none;"><span class="cf-label">قيمة الحجز (تُدفع الآن) / Booking Fee</span><b class="cf-value" id="fc-fee">—</b></div>
+                            </div>
+                        </div>
+
+                        <div class="contract-terms">
+                            <div class="contract-terms-head">الشروط والأحكام <span style="font-weight:400; font-size:0.85em;">Term &amp; Conditions</span></div>
+                            <ol class="contract-terms-list">
+                                <li>يلتزم الطرف الأول بتوفير السكن المناسب والطعام والرعاية الطبية للطرف الثالث.</li>
+                                <li>فترة التجربة محددة بـ 6 أشهر.</li>
+                                <li>يلتزم المركز (الطرف الثاني) بضمان العامل خلال فترة التجربة.</li>
+                                <li>يخضع هذا العقد لكافة القوانين واللوائح المعمول بها في وزارة الموارد البشرية.</li>
+                            </ol>
+                            <div class="contract-signatures">
+                                <div class="contract-sign">
+                                    <div class="contract-sign-label">توقيع الطرف الأول</div>
+                                    <div class="contract-sign-line"></div>
+                                    <div class="contract-director">Director Gen.</div>
+                                </div>
+                                <div class="contract-stamp" aria-hidden="true">مركز تدبير<br>للخدمات<br>TADBEER</div>
+                                <div class="contract-sign">
+                                    <div class="contract-sign-label">توقيع الطرف الثالث (العمالة)</div>
+                                    <div class="contract-sign-line"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contract modal -->
+                <div class="contract-modal-overlay" id="contract-modal" style="display:none;">
+                    <div class="contract-modal">
+                        <div class="contract-modal-bar">
+                            <div class="contract-modal-title">معاينة العقد — <span id="modal-number">—</span></div>
+                            <button type="button" class="contract-modal-close" id="btn-close-modal" title="إغلاق">✕</button>
+                        </div>
+                        <div class="contract-modal-body" id="contract-modal-body"></div>
+                        <div class="contract-modal-actions">
+                            <button type="button" class="compact-btn compact-btn-download" id="btn-download-modal">تنزيل العقد PDF</button>
+                            <button type="button" class="compact-btn compact-btn-view" id="btn-close-modal2">إغلاق</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Success state (shown after submission) -->
+                <div class="card success-overlay" id="success-card">
+                    <div class="success-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+                    </div>
+                    <h2>تم استلام حجزك بنجاح!</h2>
+                    <p style="margin-bottom:0.5rem;">شكرًا لك! تم حفظ بياناتك وعقدك، وسيتم التواصل معك خلال ساعات العمل لتأكيد التفاصيل وترتيب الخدمة.</p>
+                    <p id="success-contract-no" style="font-weight:800; color:var(--primary);"></p>
+                    <a class="home-btn" href="/home">العودة إلى الرئيسية</a>
+                </div>
+            </div>
+
+            <!-- Customer Info Form -->
+            <aside>
+                <div class="card">
+                    <form id="customer-form" novalidate>
+                        <div class="card-header" style="margin-bottom:0;">
+                            <div class="header-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            </div>
+                            <h2>بيانات العميل</h2>
+                        </div>
+
+                        <div class="section-subtitle">المعلومات الأساسية</div>
+                        <div class="form-group">
+                            <label>الاسم الكامل <span class="req">*</span></label>
+                            <input type="text" id="c-name" placeholder="مثال: أحمد محمد العلي" autocomplete="name">
+                            <div class="error-text" id="err-name">يرجى إدخال الاسم الكامل</div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>رقم الهاتف <span class="req">*</span></label>
+                                <input type="tel" id="c-phone" placeholder="05XXXXXXXX" dir="ltr" autocomplete="tel">
+                                <div class="error-text" id="err-phone">يرجى إدخال رقم هاتف صحيح</div>
+                            </div>
+                            <div class="form-group">
+                                <label>البريد الإلكتروني (Gmail) <span class="req">*</span></label>
+                                <input type="email" id="c-email" placeholder="example@gmail.com" dir="ltr" autocomplete="email">
+                                <div class="error-text" id="err-email">يرجى إدخال بريد إلكتروني صحيح</div>
+                            </div>
+                        </div>
+
+                        <div class="section-subtitle">العنوان</div>
+                        <div class="form-group">
+                            <label>الإمارة <span class="req">*</span></label>
+                            <select id="c-emirate">
+                                <option value="">اختر الإمارة</option>
+                                <option value="دبي">دبي</option>
+                                <option value="أبوظبي">أبوظبي</option>
+                                <option value="الشارقة">الشارقة</option>
+                                <option value="عجمان">عجمان</option>
+                                <option value="رأس الخيمة">رأس الخيمة</option>
+                                <option value="الفجيرة">الفجيرة</option>
+                                <option value="أم القيوين">أم القيوين</option>
+                            </select>
+                            <div class="error-text" id="err-emirate">يرجى اختيار الإمارة</div>
+                        </div>
+                        <div class="form-group" id="grp-area" style="display:none;">
+                            <label>المنطقة <span class="req">*</span></label>
+                            <select id="c-area">
+                                <option value="">اختر المنطقة</option>
+                            </select>
+                            <div class="error-text" id="err-area">يرجى اختيار المنطقة</div>
+                        </div>
+                        <div class="form-group">
+                            <label>اسم الشارع <span class="req">*</span></label>
+                            <input type="text" id="c-street" placeholder="مثال: شارع الاتحاد، شارع المطار">
+                            <div class="error-text" id="err-street">يرجى إدخال اسم الشارع</div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>رقم الفيلا / الشقة</label>
+                                <input type="text" id="c-building-no" placeholder="مثال: فيلا 12، شقة 305" dir="ltr">
+                            </div>
+                            <div class="form-group">
+                                <label>الطابق</label>
+                                <input type="text" id="c-floor" placeholder="مثال: الطابق الثالث">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>المعلم القريب (اختياري)</label>
+                            <input type="text" id="c-landmark" placeholder="مثال: بجوار مسجد الرحمة">
+                        </div>
+
+                        <button type="submit" class="submit-btn" id="submit-btn">متابعة — إتمام الحجز</button>
+                    </form>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        // 1. Read booking data passed from the order page (stored temporarily in sessionStorage)
+        let booking = null;
+        try {
+            booking = JSON.parse(sessionStorage.getItem('tdBooking') || 'null');
+        } catch (e) { booking = null; }
+
+        function fmtNum(n) { return n ? Number(n).toLocaleString('en-US') : null; }
+
+        function fillSummary() {
+            if (!booking) {
+                document.getElementById('cn-service-type').innerText = '—';
+                return false;
+            }
+            // Generate contract number: TAD + year + 5-digit random
+            const contractNo = 'TAD-' + new Date().getFullYear() + String(Math.floor(10000 + Math.random() * 90000));
+            sessionStorage.setItem('tdContractNo', contractNo);
+
+            const d = new Date();
+            const todayStr = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
+
+            const set = (id, val, fallback) => {
+                const el = document.getElementById(id);
+                if (el) el.innerText = val || fallback || '—';
+            };
+            set('cn-date', todayStr);
+            set('cn-number', contractNo);
+            set('cn-service-type', booking.serviceTypeLabel);
+            set('cn-service', booking.service);
+            set('cn-workers', booking.workers ? booking.workers + (booking.workers === 1 ? ' عاملة' : ' عاملات') : '—');
+            set('cn-nationality', booking.nationality);
+            set('cn-start', booking.date ? formatDateAr(booking.date) : '—');
+            set('cn-time', booking.time || '—');
+            set('cn-duration', booking.duration);
+            set('cn-type', booking.type);
+            set('cn-price', booking.price ? fmtNum(booking.price) + ' د.إ' : '—');
+            set('cn-total', booking.total ? fmtNum(booking.total) + ' د.إ' : '—');
+            set('cn-fee', booking.bookingFee ? fmtNum(booking.bookingFee) + ' د.إ' : '—');
+
+            // Full contract copy (used by modal preview + PDF): fields not present in the compact card
+            const setOrSkip = (id, val, fallback) => {
+                const el = document.getElementById(id);
+                if (el) el.innerText = val || fallback || '—';
+            };
+            setOrSkip('fc-service-type', booking.serviceTypeLabel);
+            setOrSkip('fc-nationality', booking.nationality);
+            setOrSkip('fc-start', booking.date ? formatDateAr(booking.date) : '—');
+            setOrSkip('fc-time', booking.time || '—');
+            setOrSkip('fc-duration', booking.duration);
+            setOrSkip('fc-type', booking.type);
+            setOrSkip('fc-price', booking.price ? fmtNum(booking.price) + ' د.إ' : '—');
+
+            // Show/hide conditional rows in both card and full contract copy
+            const toggle = (rowId, show) => {
+                const el = document.getElementById(rowId);
+                if (el) el.style.display = show ? '' : 'none';
+            };
+            toggle('cn-row-type', !!booking.type);
+            toggle('cn-row-total', !!booking.total);
+            toggle('cn-row-fee', !!booking.bookingFee);
+            toggle('cn-row-time', booking.serviceType === 'hourly' && !!booking.time);
+            toggle('fc-row-type', !!booking.type);
+            toggle('fc-row-total', !!booking.total);
+            toggle('fc-row-fee', !!booking.bookingFee);
+            toggle('fc-row-time', booking.serviceType === 'hourly' && !!booking.time);
+            return true;
+        }
+
+        function formatDateAr(dateStr) {
+            if (!dateStr) return '—';
+            try {
+                const months = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+                const p = dateStr.split('-');
+                return Number(p[2]) + ' ' + months[Number(p[1]) - 1] + ' ' + p[0];
+            } catch (e) { return dateStr; }
+        }
+
+        function fillContract() {
+            const set = (id, val) => {
+                const el = document.getElementById(id);
+                if (el && val) el.innerText = val;
+            };
+            // Compact card + full contract copy
+            const name = document.getElementById('c-name').value.trim();
+            const address = buildAddress();
+            set('cn-name', name); set('fc-name', name);
+            set('cn-address', address); set('fc-address', address);
+            set('cn-phone', document.getElementById('c-phone').value.trim());
+            set('fc-phone', document.getElementById('c-phone').value.trim());
+            set('cn-email', document.getElementById('c-email').value.trim());
+            set('fc-email', document.getElementById('c-email').value.trim());
+        }
+
+        // 1-bis. Refresh shared fields in the full contract copy before modal/PDF
+        function syncFullContract() {
+            const pairs = [
+                ['cn-date','fc-date'],['cn-number','fc-number'],
+                ['cn-service','fc-service'],['cn-workers','fc-workers'],
+                ['cn-total','fc-total'],['cn-fee','fc-fee']
+            ];
+            pairs.forEach(([a,b]) => {
+                const src = document.getElementById(a);
+                const dst = document.getElementById(b);
+                if (src && dst) dst.innerText = src.innerText;
+            });
+            // Keep customer info live in the full contract copy
+            const setOrSkip = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.innerText = val || '—';
+            };
+            setOrSkip('fc-name', document.getElementById('c-name').value.trim());
+            setOrSkip('fc-phone', document.getElementById('c-phone').value.trim());
+            setOrSkip('fc-email', document.getElementById('c-email').value.trim());
+            setOrSkip('fc-address', buildAddress());
+        }
+
+        // Contract modal + PDF
+        const modal = document.getElementById('contract-modal');
+        const modalBody = document.getElementById('contract-modal-body');
+        const modalNumber = document.getElementById('modal-number');
+        function openContractModal() {
+            syncFullContract();
+            modalNumber.innerText = document.getElementById('cn-number').innerText;
+            modalBody.innerHTML = document.getElementById('contract-page').outerHTML;
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        function closeContractModal() {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        document.getElementById('btn-view-contract').addEventListener('click', openContractModal);
+        document.getElementById('btn-close-modal').addEventListener('click', closeContractModal);
+        document.getElementById('btn-close-modal2').addEventListener('click', closeContractModal);
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeContractModal(); });
+
+        function generateContractPDF() {
+            syncFullContract();
+            const el = document.getElementById('contract-page');
+            const no = document.getElementById('cn-number').innerText.replace(/[^A-Z0-9\-]/gi, '') || 'Contract';
+            const btn = document.getElementById('btn-download-contract');
+            const origText = btn.innerText;
+            btn.innerText = 'جارٍ إنشاء الملف...';
+            btn.disabled = true;
+            html2pdf()
+                .set({
+                    margin: [8, 8, 8, 8],
+                    filename: 'Contract_' + no + '.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+                })
+                .from(el)
+                .save()
+                .then(function () {
+                    btn.innerText = origText;
+                    btn.disabled = false;
+                })
+                .catch(function () {
+                    btn.innerText = origText;
+                    btn.disabled = false;
+                    alert('تعذر إنشاء ملف العقد. جرّب مرة أخرى.');
+                });
+        }
+        document.getElementById('btn-download-contract').addEventListener('click', generateContractPDF);
+        document.getElementById('btn-download-modal').addEventListener('click', generateContractPDF);
+
+        function setupLiveFill() {
+            const nameInput = document.getElementById('c-name');
+            const phoneInput = document.getElementById('c-phone');
+            const emailInput = document.getElementById('c-email');
+            [nameInput, phoneInput, emailInput].forEach(inp => inp.addEventListener('input', fillContract));
+            ['c-street','c-building-no','c-floor','c-landmark'].forEach(id => {
+                document.getElementById(id).addEventListener('input', fillContract);
+            });
+        }
+
+        // 2. Validate & submit customer info
+        const form = document.getElementById('customer-form');
+        const submitBtn = document.getElementById('submit-btn');
+
+        function showError(id) { document.getElementById(id).style.display = 'block'; }
+        function clearErrors() {
+            document.querySelectorAll('.error-text').forEach(e => e.style.display = 'none');
+        }
+
+        // Regions per emirate
+        const emirateAreas = {
+            'دبي': ['ديرة', 'بر دبي', 'الكرامة', 'الممزر', 'القوز', 'البرشاء', 'جميرا', 'المنارة', 'المرابع العربية', 'جميرا ليك تاورز', 'الخليج التجاري', 'دبي لاند', 'الفرجان', 'مرابع دبي هيلز', 'أندلسية', 'الخوانيج', 'النهدة', 'القصباء', 'الرقّة', 'هور العنز', 'أم الشيف', 'الصفوح'],
+            'أبوظبي': ['المركزة', 'الخالدية', 'البحر', 'الرمحة', 'المنطقة الصناعية', 'المنار', 'البطيح', 'الرحمانية', 'موسفح', 'الشامخة', 'الخالدية', 'القرية', 'الرحبة', 'المرفأ', 'رويس', 'الوثبة', 'ياس', 'السعديات', 'الريم'],
+            'الشارقة': ['المجرة', 'النهاية', 'الجزنة', 'القلب', 'النهد', 'النهدة', 'الفيحاء', 'النخيلات', 'الرحمانية', 'الجبيل', 'الطباع', 'الملاحة', 'اليرموك', 'القاسمية', 'الصناعية', 'الخوان', 'الذيد', 'كلباء', 'خورفكان'],
+            'عجمان': ['النعيمية', 'الزهور', 'الروضة', 'المويهات', 'الرشيديّة', 'الحمد', 'الجرف', 'مدينة عجمان', 'الرفاعة', 'الحميدية', 'أبو شغارة', 'التعاون', 'البراجيل'],
+            'رأس الخيمة': ['النخيل', 'المعيريض', 'دحيت', 'الحمراء', 'الجزار', 'الرمس', 'الخَت', 'معرِض', 'وادي الخَت', 'مزارع', 'الشعم', 'الرمز', 'مطار', 'دفت'],
+            'الفجيرة': ['الفجيرة المركزية', 'القريات', 'سنا', 'البدية', 'الرفيص', 'المرمد', 'مرح', 'الغرفة', 'مدح', 'شرم', 'الطويين', 'دبا الفجيرة'],
+            'أم القيوين': ['أم القيوين المركزية', 'الصناعية', 'الرفاعة', 'الفلاح', 'الجزار', 'النعيم', 'الدور', 'أم الساحة', 'الفير', 'الحمرية']
+        };
+
+        const emirateSelect = document.getElementById('c-emirate');
+        const areaSelect = document.getElementById('c-area');
+        const areaGroup = document.getElementById('grp-area');
+        emirateSelect.addEventListener('change', fillContract);
+        areaSelect.addEventListener('change', fillContract);
+        emirateSelect.addEventListener('change', function() {
+            const em = this.value;
+            areaSelect.innerHTML = '<option value="">اختر المنطقة</option>';
+            if (em && emirateAreas[em]) {
+                emirateAreas[em].forEach(a => {
+                    const opt = document.createElement('option');
+                    opt.value = a; opt.innerText = a;
+                    areaSelect.appendChild(opt);
+                });
+                areaGroup.style.display = '';
+            } else {
+                areaGroup.style.display = 'none';
+            }
+            clearErrors();
+        });
+
+        function buildAddress() {
+            const p = (id) => document.getElementById(id).value.trim();
+            const parts = [];
+            if (p('c-emirate')) parts.push(p('c-emirate'));
+            if (p('c-area')) parts.push(p('c-area'));
+            if (p('c-street')) parts.push(p('c-street'));
+            if (p('c-building-no')) parts.push(p('c-building-no'));
+            if (p('c-floor')) parts.push(p('c-floor'));
+            if (p('c-landmark')) parts.push('بجوار ' + p('c-landmark'));
+            return parts.join(' - ');
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearErrors();
+
+            const name = document.getElementById('c-name').value.trim();
+            const phone = document.getElementById('c-phone').value.trim();
+            const email = document.getElementById('c-email').value.trim();
+            const emirate = document.getElementById('c-emirate').value;
+            const area = document.getElementById('c-area').value;
+            const street = document.getElementById('c-street').value.trim();
+
+            let valid = true;
+            if (!name) { showError('err-name'); valid = false; }
+            if (!/^[0-9+\s\-]{7,}$/.test(phone)) { showError('err-phone'); valid = false; }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('err-email'); valid = false; }
+            if (!emirate) { showError('err-emirate'); valid = false; }
+            if (emirate && !area) { showError('err-area'); valid = false; }
+            if (!street) { showError('err-street'); valid = false; }
+            if (!valid) return;
+
+            if (!booking) {
+                alert('انتهت صلاحية بيانات الحجز، يرجى العودة لصفحة الطلب وإعادتها.');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'جاري الإرسال...';
+
+            const address = buildAddress();
+            const bookingSummary = [
+                `نوع الخدمة: ${booking.serviceTypeLabel || '—'}`,
+                booking.service ? `الخدمة: ${booking.service}` : '',
+                booking.duration ? `المدة: ${booking.duration}` : '',
+                booking.type ? `نوع الدوام: ${booking.type}` : '',
+                booking.workers ? `عدد العمالة: ${booking.workers}` : '',
+                booking.nationality ? `الجنسية: ${booking.nationality}` : '',
+                booking.date ? `التاريخ: ${booking.date}` : '',
+                booking.time ? `الوقت: ${booking.time}` : '',
+                booking.price ? `السعر: ${fmtNum(booking.price)} د.إ` : '',
+                booking.total ? `الإجمالي: ${fmtNum(booking.total)} د.إ` : '',
+                booking.bookingFee ? `قيمة الحجز: ${fmtNum(booking.bookingFee)} د.إ` : ''
+            ].filter(Boolean).join(' | ');
+
+            try {
+                const resp = await fetch('/api/leads', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name,
+                        phone,
+                        email,
+                        city: address,
+                        contractNo: sessionStorage.getItem('tdContractNo'),
+                        contractBody: document.getElementById('summary-card').innerText,
+                        message: bookingSummary,
+                        source: 'booking-' + (booking.serviceType || 'website')
+                    })
+                });
+                const data = await resp.json().catch(() => ({}));
+
+                if (data.success) {
+                    window.location.href = '/payment.html';
+                } else {
+                    throw new Error('server-error');
+                }
+            } catch (err) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'متابعة — إتمام الحجز';
+                alert('تعذر إرسال الطلب، يرجى المحاولة مجددًا.');
+            }
+        });
+
+        // Initialize
+        setupLiveFill();
+        if (!fillSummary()) {
+            // No booking data — redirect back to order choice
+            document.querySelector('.page-wrapper').innerHTML = `
+                <div class="card" style="text-align:center; padding:3rem;">
+                    <h2 style="color:var(--primary);">لا توجد بيانات حجز</h2>
+                    <p style="color:#5b6472;">يرجى العودة إلى صفحة اختيار الخدمة وإكمال بيانات الحجز أولًا.</p>
+                    <a class="home-btn" href="/home">العودة إلى الرئيسية</a>
+                </div>`;
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</body>
+</html>

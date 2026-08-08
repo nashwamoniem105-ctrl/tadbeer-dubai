@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>طلب خدمة مدبرة - شركة تدبير</title>
+    <!-- استيراد الخطوط الأصلية من معاون -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;900&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="mawanoi-assets/index.css">
+    <style>
+        :root {
+            --primary: #152650; /* لون معاون الأصلي للاتساق الاحترافي */
+            --accent: #78182b;
+            --background: #fefbf8;
+            --foreground: #0b152c;
+            --border: #d9dee8;
+            --card: #ffffff;
+        }
+        body {
+            font-family: 'Tajawal', 'Cairo', sans-serif;
+            background-color: var(--background);
+            color: var(--foreground);
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        .tadbeer-header {
+            background: white;
+            padding: 0 1.5rem;
+            height: 80px;
+            border-bottom: 1px solid rgba(217, 222, 232, 0.6);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-blur: 10px;
+            background: rgba(255, 255, 255, 0.85);
+        }
+        .tadbeer-logo img {
+            height: 36px;
+            width: auto;
+        }
+        @media (max-width: 640px) { .tadbeer-logo img { height: 28px; } }
+        .back-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover {
+            color: var(--accent);
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, #f5f7fa 0%, #fefbf8 100%);
+            border-bottom: 1px solid rgba(217, 222, 232, 0.6);
+            padding: 3.5rem 1.5rem;
+        }
+        .gradient-hero-text {
+            background: linear-gradient(to right, #152650, #78182b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            white-space: nowrap;
+        }
+        h1 {
+            white-space: nowrap;
+            font-size: 2.25rem !important; /* تصغير الحجم لضمان الظهور */
+        }
+        @media (max-width: 768px) {
+            h1 { font-size: 1.75rem !important; }
+        }
+        .section-icon-container {
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            border-radius: 0.75rem;
+            background: linear-gradient(135deg, #152650 0%, #2a3d66 100%);
+            color: white;
+            font-weight: 900;
+        }
+        
+        .option-card {
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid var(--border);
+            background: var(--card);
+            border-radius: 1.25rem;
+            padding: 1.25rem;
+            position: relative;
+        }
+        .option-card:hover {
+            border-color: rgba(120, 24, 43, 0.4);
+            transform: translateY(-2px);
+        }
+        .option-card.active {
+            border-color: var(--accent) !important;
+            background-color: rgba(120, 24, 43, 0.03) !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .service-icon-box {
+            width: 48px;
+            height: 36px;
+            background: linear-gradient(135deg, #152650 0%, #2a3d66 100%);
+            border-radius: 0.75rem;
+            display: grid;
+            place-items: center;
+            color: white;
+            flex-shrink: 0;
+        }
+        .service-icon-box svg {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .counter-container {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            background: #f8f9fa;
+            border: 1px solid var(--border);
+            border-radius: 1.25rem;
+            padding: 0.75rem 1.25rem;
+            width: fit-content;
+            margin-top: 0.5rem;
+        }
+        .counter-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 0.85rem;
+            border: 1px solid var(--border);
+            background: white;
+            color: var(--primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .counter-btn:hover { 
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-1px);
+        }
+        .counter-btn:active {
+            transform: translateY(0);
+        }
+        .counter-value {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--primary);
+            min-width: 30px;
+            text-align: center;
+            user-select: none;
+        }
+        
+        .summary-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            padding: 1.75rem;
+            box-shadow: 0 10px 30px -15px rgba(10, 24, 59, 0.15);
+            position: sticky;
+            top: 100px;
+        }
+        .confirm-btn {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+            padding: 1rem;
+            border-radius: 1rem;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            transition: all 0.2s;
+        }
+        .confirm-btn:hover {
+            background: var(--accent);
+            transform: scale(1.02);
+        }
+    </style>
+    <link rel="stylesheet" href="/custom-styles.css">
+</head>
+<body>
+    <header class="tadbeer-header">
+        <div class="tadbeer-logo">
+            <img src="media/kv4pfeid/logo-website-10-4.png" alt="تدبير">
+        </div>
+        <a href="/home" class="back-link">
+            الرجوع للرئيسية
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+        </a>
+    </header>
+
+    <section class="hero-section">
+        <div class="container mx-auto px-6">
+            <span class="inline-flex items-center gap-2 rounded-full bg-accent/10 px-4 py-1.5 text-xs font-bold text-accent">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"></path></svg>
+                عقود مرنة بأسعار توفّر لك أكثر
+            </span>
+            <h1 class="mt-5 text-4xl font-black leading-tight text-primary lg:text-5xl">عمالة منزلية <span class="gradient-hero-text">بالشهر</span></h1>
+            <p class="mt-4 max-w-2xl text-lg text-muted-foreground">اختر مدة العقد، نوع الخدمة، الجنسية، ونمط الدوام — وحدّد موعد بدء الخدمة بكل سهولة.</p>
+        </div>
+    </section>
+
+    <section class="py-14 lg:py-20">
+        <div class="container mx-auto grid gap-8 px-6 lg:grid-cols-3">
+            <div class="lg:col-span-2 space-y-10">
+                <!-- 1. Duration -->
+                <section class="rounded-3xl border border-border bg-card/40 p-7">
+                    <div class="mb-6 flex items-center gap-3">
+                        <div class="section-icon-container">1</div>
+                        <div class="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-accent"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="M8 2v4"></path><path d="M16 2v4"></path></svg>
+                            <h2 class="text-xl font-black text-primary">اختيار مدة العقد</h2>
+                        </div>
+                    </div>
+                    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <div class="option-card" onclick="select('duration', 'أسبوعان', 640, this)">
+                            <span class="absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold bg-secondary text-accent">14 زيارة</span>
+                            <div class="text-xl font-black text-primary">أسبوعان</div>
+                            <div class="mt-2 text-sm text-muted-foreground">السعر الإجمالي</div>
+                            <div class="text-xl font-black text-primary">640 <span class="text-sm font-bold text-accent">د.إ</span></div>
+                        </div>
+                        <div class="option-card" onclick="select('duration', 'شهر', 1280, this)">
+                            <div class="text-xl font-black text-primary">شهر</div>
+                            <div class="mt-2 text-sm text-muted-foreground">السعر الإجمالي</div>
+                            <div class="text-xl font-black text-primary">1,280 <span class="text-sm font-bold text-accent">د.إ</span></div>
+                        </div>
+                        <div class="option-card" onclick="select('duration', 'شهران', 2560, this)">
+                            <div class="text-xl font-black text-primary">شهران</div>
+                            <div class="mt-2 text-sm text-muted-foreground">السعر الإجمالي</div>
+                            <div class="text-xl font-black text-primary">2,560 <span class="text-sm font-bold text-accent">د.إ</span></div>
+                        </div>
+                        <div class="option-card" onclick="select('duration', '3 شهور', 3840, this)">
+                            <div class="text-xl font-black text-primary">3 شهور</div>
+                            <div class="mt-2 text-sm text-muted-foreground">السعر الإجمالي</div>
+                            <div class="text-xl font-black text-primary">3,840 <span class="text-sm font-bold text-accent">د.إ</span></div>
+                        </div>
+                        <div class="option-card" onclick="select('duration', '6 شهور', 7000, this)">
+                            <div class="text-xl font-black text-primary">6 شهور</div>
+                            <div class="mt-2 text-sm text-muted-foreground">السعر الإجمالي</div>
+                            <div class="text-xl font-black text-primary">7,000 <span class="text-sm font-bold text-accent">د.إ</span></div>
+                        </div>
+                        <div class="option-card" onclick="select('duration', 'سنة كاملة', 13500, this)">
+                            <span class="absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold bg-accent text-white">الأوفر</span>
+                            <div class="text-xl font-black text-primary">سنة كاملة</div>
+                            <div class="mt-2 text-sm text-muted-foreground">السعر الإجمالي</div>
+                            <div class="text-xl font-black text-primary">13,500 <span class="text-sm font-bold text-accent">د.إ</span></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. Service -->
+                <section class="rounded-3xl border border-border bg-card/40 p-7">
+                    <div class="mb-6 flex items-center gap-3">
+                        <div class="section-icon-container">2</div>
+                        <div class="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-accent"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            <h2 class="text-xl font-black text-primary">اختيار الخدمة المطلوبة</h2>
+                        </div>
+                    </div>
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="option-card flex items-start gap-4" onclick="select('service', 'عاملة منزلية', null, this)">
+                            <div class="service-icon-box">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-lg font-bold text-primary">عاملة منزلية</h3>
+                                <p class="mt-1 text-sm text-muted-foreground">تنظيف، غسيل، طبخ، رعاية أطفال</p>
+                            </div>
+                        </div>
+                        <div class="option-card flex items-start gap-4" onclick="select('service', 'طبّاخة', null, this)">
+                            <div class="service-icon-box">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21a1 1 0 0 0 1-1v-5.35c0-.457.316-.844.727-1.041a4 4 0 0 0-2.134-7.589 5 5 0 0 0-9.186 0 4 4 0 0 0-2.134 7.588c.411.198.727.585.727 1.041V20a1 1 0 0 0 1 1Z"></path><path d="M6 17h12"></path></svg>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-lg font-bold text-primary">طبّاخة</h3>
+                                <p class="mt-1 text-sm text-muted-foreground">تحضير وجبات يومية متنوّعة</p>
+                            </div>
+                        </div>
+                        <div class="option-card flex items-start gap-4" onclick="select('service', 'رعاية أطفال', null, this)">
+                            <div class="service-icon-box">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"></path><path d="M15 12h.01"></path><path d="M19.38 6.813A9 9 0 0 1 20.8 10.2a2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1"></path><path d="M9 12h.01"></path></svg>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-lg font-bold text-primary">رعاية أطفال</h3>
+                                <p class="mt-1 text-sm text-muted-foreground">مربية مدرّبة وموثوقة</p>
+                            </div>
+                        </div>
+                        <div class="option-card flex items-start gap-4" onclick="select('service', 'سائق خاص', null, this)">
+                            <div class="service-icon-box">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"></path><circle cx="7" cy="17" r="2"></circle><path d="M9 17h6"></path><circle cx="17" cy="17" r="2"></circle></svg>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-lg font-bold text-primary">سائق خاص</h3>
+                                <p class="mt-1 text-sm text-muted-foreground">توصيل آمن داخل الإمارات</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. Type -->
+                <section class="rounded-3xl border border-border bg-card/40 p-7">
+                    <div class="mb-6 flex items-center gap-3">
+                        <div class="section-icon-container">3</div>
+                        <div class="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-accent"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                            <h2 class="text-xl font-black text-primary">نوع الخدمة</h2>
+                        </div>
+                    </div>
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="option-card" onclick="select('type', 'زيارات', null, this)">
+                            <h3 class="text-lg font-bold text-primary">زيارات</h3>
+                            <p class="mt-1 text-sm text-muted-foreground">دوام نهاري بدون مبيت</p>
+                        </div>
+                        <div class="option-card" onclick="select('type', 'مبيت', null, this)">
+                            <h3 class="text-lg font-bold text-primary">مبيت</h3>
+                            <p class="mt-1 text-sm text-muted-foreground">إقامة كاملة لدى الأسرة</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 4. Workers Count -->
+                <section class="rounded-3xl border border-border bg-card/40 p-7">
+                    <div class="mb-6 flex items-center gap-3">
+                        <div class="section-icon-container">4</div>
+                        <div class="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-accent"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                            <h2 class="text-xl font-black text-primary">عدد العمالة المطلوب</h2>
+                        </div>
+                    </div>
+                    <div class="counter-container">
+                        <button class="counter-btn" onclick="updateWorkers(-1)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path></svg>
+                        </button>
+                        <div class="flex flex-col items-center mx-6">
+                            <span class="counter-value" id="workers-count" style="margin:0; line-height:1;">1</span>
+                            <span class="text-[10px] font-bold text-muted-foreground mt-1">عامل/عاملة</span>
+                        </div>
+                        <button class="counter-btn" onclick="updateWorkers(1)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- 5. Nationality -->
+                <section class="rounded-3xl border border-border bg-card/40 p-7">
+                    <div class="mb-6 flex items-center gap-3">
+                        <div class="section-icon-container">5</div>
+                        <h2 class="text-xl font-black text-primary">اختيار الجنسية المطلوبة</h2>
+                    </div>
+                    <div class="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+                        <div class="option-card flex flex-col items-center gap-3" onclick="select('nationality', 'الفلبين', null, this)">
+                            <img src="mawanoi-assets/flags/ph.svg" class="h-10 w-14 object-cover rounded-lg shadow-sm border border-gray-100">
+                            <span class="font-bold">الفلبين</span>
+                        </div>
+                        <div class="option-card flex flex-col items-center gap-3" onclick="select('nationality', 'الهند', null, this)">
+                            <img src="mawanoi-assets/flags/in.svg" class="h-10 w-14 object-cover rounded-lg shadow-sm border border-gray-100">
+                            <span class="font-bold">الهند</span>
+                        </div>
+                        <div class="option-card flex flex-col items-center gap-3" onclick="select('nationality', 'إندونيسيا', null, this)">
+                            <img src="mawanoi-assets/flags/id.svg" class="h-10 w-14 object-cover rounded-lg shadow-sm border border-gray-100">
+                            <span class="font-bold">إندونيسيا</span>
+                        </div>
+                        <div class="option-card flex flex-col items-center gap-3" onclick="select('nationality', 'إثيوبيا', null, this)">
+                            <img src="mawanoi-assets/flags/et.svg" class="h-10 w-14 object-cover rounded-lg shadow-sm border border-gray-100">
+                            <span class="font-bold">إثيوبيا</span>
+                        </div>
+                        <div class="option-card flex flex-col items-center gap-3" onclick="select('nationality', 'كينيا', null, this)">
+                            <img src="mawanoi-assets/flags/ke.svg" class="h-10 w-14 object-cover rounded-lg shadow-sm border border-gray-100">
+                            <span class="font-bold">كينيا</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 6. Date -->
+                <section class="rounded-3xl border border-border bg-card/40 p-7">
+                    <div class="mb-6 flex items-center gap-3">
+                        <div class="section-icon-container">6</div>
+                        <h2 class="text-xl font-black text-primary">تاريخ بدء الخدمة</h2>
+                    </div>
+                    <input type="date" id="start-date" class="w-full p-4 rounded-2xl border-2 border-border focus:border-accent outline-none transition-colors" onchange="updateSummary()">
+                </section>
+            </div>
+
+            <!-- Summary -->
+            <aside>
+                <div class="summary-card">
+                    <h2 class="text-xl font-black text-primary mb-6">ملخّص العقد</h2>
+                    <div class="space-y-4">
+                        <div class="flex justify-between border-b border-gray-100 pb-3"><span class="text-muted-foreground">مدة العقد</span><b id="sum-duration" class="text-primary">—</b></div>
+                        <div class="flex justify-between border-b border-gray-100 pb-3"><span class="text-muted-foreground">الخدمة</span><b id="sum-service" class="text-primary">—</b></div>
+                        <div class="flex justify-between border-b border-gray-100 pb-3"><span class="text-muted-foreground">النوع</span><b id="sum-type" class="text-primary">—</b></div>
+                        <div class="flex justify-between border-b border-gray-100 pb-3"><span class="text-muted-foreground">الجنسية</span><b id="sum-nationality" class="text-primary">—</b></div>
+                        <div class="flex justify-between border-b border-gray-100 pb-3"><span class="text-muted-foreground">عدد العمالة</span><b id="sum-workers" class="text-primary">1</b></div>
+                        <div class="flex justify-between border-b border-gray-100 pb-3"><span class="text-muted-foreground">تاريخ البدء</span><b id="sum-date" class="text-primary">—</b></div>
+                        <div class="flex justify-between border-b border-gray-100 pb-3"><span class="text-muted-foreground">سعر العقد</span><b id="sum-contract-price" class="text-primary">—</b></div>
+                        <div class="flex justify-between pt-4"><span class="text-lg font-bold text-primary">المبلغ الإجمالي</span><b id="sum-total" class="text-2xl font-black text-accent">0 د.إ</b></div>
+                        <div class="flex justify-between text-xs text-muted-foreground"><span>قيمة الحجز (تُدفع الآن)</span><b id="sum-booking-fee">0 د.إ</b></div>
+                        <div class="flex justify-between text-xs text-muted-foreground"><span>المتبقي (نهاية الخدمة)</span><b id="sum-remaining">0 د.إ</b></div>
+                    </div>
+                    <button class="confirm-btn" onclick="submitOrder()">تأكيد الطلب</button>
+                </div>
+            </aside>
+        </div>
+    </section>
+
+    <script>
+        const state = {
+            duration: '',
+            service: '',
+            type: '',
+            nationality: '',
+            workers: 1,
+            price: 0,
+            date: ''
+        };
+
+        function select(field, value, price, el) {
+            const siblings = el.parentElement.children;
+            for (let s of siblings) s.classList.remove('active');
+            el.classList.add('active');
+            
+            state[field] = value;
+            if (price !== null) state.price = price;
+            updateSummary();
+        }
+
+        function updateWorkers(delta) {
+            state.workers = Math.max(1, state.workers + delta);
+            document.getElementById('workers-count').innerText = state.workers;
+            updateSummary();
+        }
+
+        function updateSummary() {
+            document.getElementById('sum-duration').innerText = state.duration || '—';
+            document.getElementById('sum-service').innerText = state.service || '—';
+            document.getElementById('sum-type').innerText = state.type || '—';
+            document.getElementById('sum-nationality').innerText = state.nationality || '—';
+            document.getElementById('sum-workers').innerText = state.workers;
+            
+            const dateVal = document.getElementById('start-date').value;
+            document.getElementById('sum-date').innerText = dateVal || '—';
+            
+            const total = state.price * state.workers;
+            const bookingFee = total > 0 ? 10 : 0;
+            const remaining = Math.max(0, total - bookingFee);
+
+            document.getElementById('sum-contract-price').innerText = state.price ? state.price.toLocaleString() + ' د.إ' : '—';
+            document.getElementById('sum-total').innerText = total.toLocaleString() + ' د.إ';
+            document.getElementById('sum-booking-fee').innerText = bookingFee.toLocaleString() + ' د.إ';
+            document.getElementById('sum-remaining').innerText = remaining.toLocaleString() + ' د.إ';
+        }
+
+        function submitOrder() {
+            if (!state.duration || !state.service || !state.type || !state.nationality || !document.getElementById('start-date').value) {
+                alert('يرجى اختيار كافة التفاصيل أولاً');
+                return;
+            }
+            const total = state.price * state.workers;
+            const bookingFee = total > 0 ? 10 : 0;
+            const remaining = Math.max(0, total - bookingFee);
+            const booking = {
+                serviceType: 'monthly',
+                serviceTypeLabel: 'عمالة منزلية بالشهر',
+                service: state.service,
+                duration: state.duration,
+                type: state.type,
+                workers: state.workers,
+                nationality: state.nationality,
+                date: document.getElementById('start-date').value,
+                price: state.price,
+                total: total,
+                bookingFee: bookingFee,
+                remaining: remaining
+            };
+            sessionStorage.setItem('tdBooking', JSON.stringify(booking));
+            window.location.href = '/customer-info.html';
+        }
+    </script>
+</body>
+</html>
