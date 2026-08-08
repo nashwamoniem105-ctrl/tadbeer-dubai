@@ -1,0 +1,24 @@
+{
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "name": "tadbeer_github",
+  "version": "1.0.0",
+  "description": "موقع شركة تدبير للاستقدام - النسخة الكاملة (العربية والإنجليزية).",
+  "main": "main.1c3d9c9b78f85f28.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nashwamoniem105-ctrl/tadbeer-dubai.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nashwamoniem105-ctrl/tadbeer-dubai/issues"
+  },
+  "homepage": "https://github.com/nashwamoniem105-ctrl/tadbeer-dubai#readme"
+}
