@@ -1,0 +1,25 @@
+
+/* تصغير الشعار (Logo) فقط في جميع الصفحات */
+
+/* تصغير الشعار في الهيدر الرئيسي */
+.navbar .cursor-p img.img-fluid {
+    height: 40px !important;
+    width: auto !important;
+}
+
+/* تصغير الشعار في صفحات معلومات العميل وطلب الخدمة */
+.tadbeer-logo img {
+    height: 30px !important;
+    width: auto !important;
+}
+
+/* تصغير الشعار في العقود والمودالات */
+.compact-logo {
+    height: 45px !important;
+    width: auto !important;
+}
+
+.contract-header-logo {
+    height: 40px !important;
+    width: auto !important;
+}

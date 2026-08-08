@@ -1,0 +1,6 @@
+node_modules/
+server/tadbeer.db
+server/tadbeer.db-wal
+server/tadbeer.db-shm
+.env
+.DS_Store
