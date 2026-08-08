@@ -88,7 +88,7 @@
         .input-wrap { position: relative; display: flex; align-items: center; }
         .input-wrap .brand-ic {
             position: absolute;
-            right: 12px;
+            left: 12px;
             top: 50%;
             transform: translateY(-50%);
             height: 20px;
@@ -124,7 +124,7 @@
         }
         .check-ic {
             position: absolute;
-            left: 12px;
+            right: 12px;
             top: 50%;
             transform: translateY(-50%);
             width: 20px; height: 20px;
@@ -145,7 +145,7 @@
             transition: border-color .2s, box-shadow .2s;
         }
         input:focus, select:focus { border-color: #8ab9db; box-shadow: 0 0 0 2px rgba(13,103,190,.12); }
-        input.card-input { padding-right: 54px; padding-left: 40px; }
+        input.card-input { padding-right: 40px; padding-left: 54px; direction: ltr; text-align: left; }
         input.err { border-color: #ef4444; background: #fef2f2; }
         input.ok { border-color: #22c55e; }
         select.err { border-color: #ef4444; }
