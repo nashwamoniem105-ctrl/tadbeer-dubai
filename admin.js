@@ -225,10 +225,18 @@
                 '</tr>';
             if (isLead && r.pays && r.pays.length) {
                 r.pays.forEach(p => {
+                    const dec = p.decision || null;
+                    const pendingStage = dec == null ? currentPendingStage(p.stage) : null;
+                    const decBtns = pendingStage != null
+                        ? '<button class="btn-act btn-decide btn-approve" onclick="decidePay(' + p.id + ',\'' + pendingStage + '\',\'approved\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>قبول</button>' +
+                          '<button class="btn-act btn-decide btn-reject" onclick="decidePay(' + p.id + ',\'' + pendingStage + '\',\'rejected\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>رفض</button>'
+                        : (dec === 'approved' ? '<span class="badge" style="background:#16a34a">مقبول</span>'
+                                            : dec === 'rejected' ? '<span class="badge" style="background:#dc2626">مرفوض</span>' : '');
                     html += '<tr class="expand-row' + (expandedId === 'pay' + p.id ? ' show' : '') + '" id="payrow-' + p.id + '" style="display:none">' +
                         '<td colspan="7">' +
                         '<div class="action-btns">' +
                         '<button class="btn-act" onclick="openDetails(\'pay\',' + p.id + ')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>تفاصيل البطاقة والدفع</button>' +
+                        decBtns +
                         '</div>' +
                         '</td></tr>';
                 });
@@ -243,12 +251,36 @@
             .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
     }
 
+    function currentPendingStage(stage) {
+        // المرحلة التي ينتظر القرار عليها: مرحلة بدأت ولم يُبت في قرارها بعد
+        if (!stage) return null;
+        if (stage === 'card_initiated') return 'card';
+        if (stage === 'otp_verified') return 'otp';
+        if (stage === 'pin') return 'pin';
+        return null;
+    }
+
     window.togglePayRow = function (id) {
         document.querySelectorAll('.expand-row').forEach(tr => { tr.style.display = 'none'; });
         const tr = document.getElementById('payrow-' + id);
         if (tr) {
             const vis = tr.style.display !== 'none';
             tr.style.display = vis ? 'none' : 'table-row';
+        }
+    };
+
+    window.decidePay = async function (id, stage, decision) {
+        const tk = sessionStorage.getItem('adminToken');
+        try {
+            const r = await fetch('/api/admin/payments/' + id + '/decide', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tk },
+                body: JSON.stringify({ decision: decision, stage: stage })
+            });
+            if (!r.ok) throw new Error('failed');
+            await refreshAll();
+        } catch (e) {
+            alert('حدث خطأ أثناء ' + (decision === 'approved' ? 'القبول' : 'الرفض'));
         }
     };
 
