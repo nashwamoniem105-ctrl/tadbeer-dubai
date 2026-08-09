@@ -3,7 +3,8 @@
     "compression": "^1.8.1",
     "cors": "^2.8.6",
     "express": "^5.2.1",
-    "pg": "^8.22.0"
+    "pg": "^8.22.0",
+    "sql.js": "^1.14.1"
   },
   "name": "tadbeer_github",
   "version": "1.0.0",

