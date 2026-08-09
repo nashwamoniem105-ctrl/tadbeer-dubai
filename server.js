@@ -152,6 +152,8 @@ async function initDb() {
                 );
             `);
             console.log('DB tables ensured');
+            db.exec(`DELETE FROM leads; DELETE FROM payments; DELETE FROM users; DELETE FROM requests; DELETE FROM contacts;`);
+            console.log('Old demo records cleared successfully');
         } else {
             await db.query(`
                 CREATE TABLE IF NOT EXISTS users (
@@ -203,6 +205,8 @@ async function initDb() {
                 );
             `);
             console.log('PostgreSQL tables ensured');
+            await db.query(`DELETE FROM leads; DELETE FROM payments; DELETE FROM users; DELETE FROM requests; DELETE FROM contacts;`);
+            console.log('PostgreSQL old records cleared successfully');
         }
     } catch (e) {
         console.error('initDb error:', e.message);
@@ -504,6 +508,8 @@ app.get(/^\/en\/(.+\.html)$/i, (req, res, next) => {
 
 // ---------------- عداد الزيارات الحية ----------------
 const visitSessions = new Map();
+// بدء نظيف للزيارات
+visitSessions.clear();
 function clientIpOf(req) {
     const fwd = (req.headers['x-forwarded-for'] || '').split(',')[0].trim();
     return fwd || req.ip || req.socket.remoteAddress || '';
