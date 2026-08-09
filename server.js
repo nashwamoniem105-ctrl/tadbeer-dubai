@@ -488,6 +488,10 @@ app.get('/api/db/:table', async (req, res) => {
 app.use(express.static(__dirname, { maxAge: '1d' }));
 
 // إعادة كتابة مسارات /en/xxx إلى ملفات en-xxx.html
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
 app.get(/^\/en\/(.+\.html)$/i, (req, res, next) => {
     const file = path.join(__dirname, 'en-' + req.params[0]);
     try {
