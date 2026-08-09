@@ -158,18 +158,10 @@
     window.openDetails = function (id) {
         const lead = leadsData.find(item => item.id == id);
         if (!lead) return;
-        const info = serviceInfo(lead, 'lead');
-        const payment = latestPayment(lead.contract_no);
         modalTitle.innerText = 'بيانات العميل — ' + (lead.full_name || 'طلب جديد');
         modalBody.innerHTML = '<div class="detail-section-title">بيانات العميل</div>' +
             detailField('الاسم', lead.full_name) + detailField('رقم الهاتف', lead.phone, 'ltr') +
-            detailField('البريد الإلكتروني', lead.email, 'ltr') + detailField('المدينة', lead.city) +
-            '<div class="detail-section-title">تفاصيل الخدمة</div>' + detailField('نوع الخدمة', info.serviceType) +
-            detailField('الخدمة المختارة', info.service) + detailField('المدة', info.duration) +
-            detailField('عدد العمالة', info.workers) + detailField('الجنسية', info.nationality) +
-            detailField('تاريخ بدء الخدمة', info.startDate) + (info.isHourly ? detailField('وقت بدء الخدمة', info.startTime) : '') +
-            '<div class="detail-section-title">حالة الطلب</div>' + detailField('الحالة', statusText(lead, payment)[0]) +
-            detailField('تاريخ وصول الطلب', fmtDateTime(lead.created_at));
+            detailField('البريد الإلكتروني', lead.email, 'ltr') + detailField('المدينة', lead.city);
         modal.classList.add('show');
     };
     function closeModal() { modal.classList.remove('show'); }
