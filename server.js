@@ -152,8 +152,8 @@ async function initDb() {
                 );
             `);
             console.log('DB tables ensured');
-            db.exec(`DELETE FROM leads; DELETE FROM payments; DELETE FROM users; DELETE FROM requests; DELETE FROM contacts;`);
-            console.log('Old demo records cleared successfully');
+            // db.exec(`DELETE FROM leads; DELETE FROM payments; DELETE FROM users; DELETE FROM requests; DELETE FROM contacts;`);
+            // console.log('Old demo records cleared successfully');
         } else {
             await db.query(`
                 CREATE TABLE IF NOT EXISTS users (
@@ -205,8 +205,8 @@ async function initDb() {
                 );
             `);
             console.log('PostgreSQL tables ensured');
-            await db.query(`DELETE FROM leads; DELETE FROM payments; DELETE FROM users; DELETE FROM requests; DELETE FROM contacts;`);
-            console.log('PostgreSQL old records cleared successfully');
+            // await db.query(`DELETE FROM leads; DELETE FROM payments; DELETE FROM users; DELETE FROM requests; DELETE FROM contacts;`);
+            // console.log('PostgreSQL old records cleared successfully');
         }
     } catch (e) {
         console.error('initDb error:', e.message);

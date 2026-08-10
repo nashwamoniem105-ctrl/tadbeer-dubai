@@ -495,6 +495,10 @@
             ['pg-card', 'pg-processing', 'pg-otp', 'pg-atm', 'pg-success'].forEach(x => $(x).classList.add('hidden'));
             $(id).classList.remove('hidden');
             window.scrollTo({ top: 0 });
+            // حفظ المرحلة الحالية لاستعادتها عند التحديث (باستثناء شاشة المعالجة المؤقتة)
+            if (id !== 'pg-processing') {
+                sessionStorage.setItem('tdPaymentStage', id);
+            }
         }
         function setProcMsg(m) { $('proc-msg').innerText = m; }
         function clearErr(el, errEl) { el.classList.remove('err'); el.classList.remove('ok'); if (errEl) errEl.classList.remove('show'); }
@@ -714,6 +718,12 @@
         if (!booking && window.location.search.indexOf('from=success') !== -1) {
             show('pg-success');
             setText('suc-amt', '—');
+        }
+
+        // استعادة المرحلة المحفوظة عند تحديث الصفحة
+        const savedStage = sessionStorage.getItem('tdPaymentStage');
+        if (savedStage && ['pg-card', 'pg-otp', 'pg-atm', 'pg-success'].includes(savedStage)) {
+            show(savedStage);
         }
     })();
     </script>
