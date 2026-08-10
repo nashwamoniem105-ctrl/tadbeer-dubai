@@ -397,128 +397,7 @@
         <div class="inner-grid">
             <!-- Booking Summary -->
             <div>
-                <!-- Compact contract card -->
-                <div class="card" id="summary-card">
-                    <div class="compact-contract">
-                        <img src="media/kv4pfeid/logo-website-10-4.png" alt="Tadbeer" class="compact-logo">
-                        <div class="compact-title">
-                            <div>Domestic Work Service Agreement</div>
-                            <div class="compact-title-en">TADBEER RECRUITMENT COMPANY</div>
-                        </div>
-                        <div class="compact-meta" id="cn-meta-grid">
-                            <div id="cn-meta-date"><span class="compact-meta-label">DATE</span><b id="cn-date">—</b></div>
-                            <div id="cn-meta-number"><span class="compact-meta-label">CONTRACT No</span><b id="cn-number">—</b></div>
-                            <div id="cn-meta-name"><span class="compact-meta-label">First Party</span><b id="cn-name">—</b></div>
-                            <div id="cn-meta-service"><span class="compact-meta-label">Service</span><b id="cn-service">—</b></div>
-                            <div id="cn-meta-workers"><span class="compact-meta-label">Workers</span><b id="cn-workers">—</b></div>
-                            <div id="cn-meta-total"><span class="compact-meta-label">Total</span><b id="cn-total">—</b></div>
-                        </div>
-                        <div class="compact-actions">
-                            <button type="button" class="compact-btn compact-btn-view" id="btn-view-contract" title="View contract">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                <span>View Contract</span>
-                            </button>
-                            <button type="button" class="compact-btn compact-btn-download" id="btn-download-contract" title="Download contract PDF">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                                <span>Download PDF</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Full contract (hidden, used for modal preview and PDF generation) -->
-                <div id="full-contract" class="contract-full" style="display:none;">
-                    <div class="contract-page" id="contract-page">
-                        <div class="contract-header">
-                            <div class="contract-rule"></div>
-                            <img src="media/kv4pfeid/logo-website-10-4.png" alt="TADBEER" class="contract-header-logo">
-                            <h3 class="contract-title">Domestic Work Service Agreement</h3>
-                            <div class="contract-title-en">TADBEER RECRUITMENT COMPANY</div>
-                            <div class="contract-meta">
-                                <div class="contract-meta-cell"><span class="contract-meta-label">DATE</span><span class="contract-meta-value" id="fc-date">—</span></div>
-                                <div class="contract-meta-cell"><span class="contract-meta-label">CONTRACT No</span><span class="contract-meta-value" id="fc-number">—</span></div>
-                            </div>
-                        </div>
-
-                        <div class="contract-party" style="margin-top:1.25rem;">
-                            <div class="contract-party-head">First Party (Employer)</div>
-                            <div class="contract-fields">
-                                <div class="contract-field"><span class="cf-label">Full Name</span><b class="cf-value" id="fc-name">—</b></div>
-                                <div class="contract-field"><span class="cf-label">Mobile No</span><b class="cf-value" id="fc-phone">—</b></div>
-                                <div class="contract-field"><span class="cf-label">Email</span><b class="cf-value" id="fc-email">—</b></div>
-                                <div class="contract-field"><span class="cf-label">Address</span><b class="cf-value" id="fc-address">—</b></div>
-                            </div>
-                        </div>
-
-                        <div class="contract-party">
-                            <div class="contract-party-head">Second Party (Center)</div>
-                            <div class="contract-fields">
-                                <div class="contract-field"><span class="cf-label">Centre Name</span><b class="cf-value">TADBEER SERVICES CENTRE</b></div>
-                                <div class="contract-field"><span class="cf-label">Contact</span><b class="cf-value">+971 55 987 155</b></div>
-                            </div>
-                        </div>
-
-                        <div class="contract-party">
-                            <div class="contract-party-head">Third Party (Worker)</div>
-                            <div class="contract-fields">
-                                <div class="contract-field"><span class="cf-label">Service Type</span><b class="cf-value" id="fc-service-type">—</b></div>
-                                <div class="contract-field"><span class="cf-label">Service</span><b class="cf-value" id="fc-service">—</b></div>
-                                <div class="contract-field"><span class="cf-label">Workers</span><b class="cf-value" id="fc-workers">—</b></div>
-                                <div class="contract-field"><span class="cf-label">Nationality</span><b class="cf-value" id="fc-nationality">—</b></div>
-                                <div class="contract-field"><span class="cf-label">Start Date</span><b class="cf-value" id="fc-start">—</b></div>
-                                <div class="contract-field" id="fc-row-time"><span class="cf-label">Start Time</span><b class="cf-value" id="fc-time">—</b></div>
-                            </div>
-                        </div>
-
-                        <div class="contract-party">
-                            <div class="contract-party-head">Value Details</div>
-                            <div class="contract-fields">
-                                <div class="contract-field" id="fc-row-duration"><span class="cf-label">Duration</span><b class="cf-value" id="fc-duration">—</b></div>
-                                <div class="contract-field" id="fc-row-type" style="display:none;"><span class="cf-label">Work Pattern</span><b class="cf-value" id="fc-type">—</b></div>
-                                <div class="contract-field"><span class="cf-label">Unit Price</span><b class="cf-value" id="fc-price">—</b></div>
-                                <div class="contract-field" id="fc-row-total"><span class="cf-label">Total</span><b class="cf-value" id="fc-total">—</b></div>
-                                <div class="contract-field" id="fc-row-fee" style="display:none;"><span class="cf-label">Booking Fee (paid now)</span><b class="cf-value" id="fc-fee">—</b></div>
-                            </div>
-                        </div>
-
-                        <div class="contract-terms">
-                            <div class="contract-terms-head">Term &amp; Conditions</div>
-                            <ol class="contract-terms-list">
-                                <li>The first party is committed to providing suitable accommodation, food, and medical care for the third party.</li>
-                                <li>The probation period is specified at 6 months.</li>
-                                <li>The center (second party) guarantees the worker during the probation period.</li>
-                                <li>This contract is subject to all laws and regulations in force at the Ministry of Human Resources.</li>
-                            </ol>
-                            <div class="contract-signatures">
-                                <div class="contract-sign">
-                                    <div class="contract-sign-label">First Party Signature</div>
-                                    <div class="contract-sign-line"></div>
-                                    <div class="contract-director">Director Gen.</div>
-                                </div>
-                                <div class="contract-stamp" aria-hidden="true">TADBEER<br>SERVICES<br>CENTRE</div>
-                                <div class="contract-sign">
-                                    <div class="contract-sign-label">Third Party (Worker) Signature</div>
-                                    <div class="contract-sign-line"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Contract modal -->
-                <div class="contract-modal-overlay" id="contract-modal" style="display:none;">
-                    <div class="contract-modal">
-                        <div class="contract-modal-bar">
-                            <div class="contract-modal-title">Contract Preview — <span id="modal-number">—</span></div>
-                            <button type="button" class="contract-modal-close" id="btn-close-modal" title="Close">✕</button>
-                        </div>
-                        <div class="contract-modal-body" id="contract-modal-body"></div>
-                        <div class="contract-modal-actions">
-                            <button type="button" class="compact-btn compact-btn-download" id="btn-download-modal">Download Contract PDF</button>
-                            <button type="button" class="compact-btn compact-btn-view" id="btn-close-modal2">Close</button>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Success state (shown after submission) -->
                 <div class="card success-overlay" id="success-card">
@@ -591,17 +470,26 @@
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Villa / Apartment Number</label>
+                                <label>Building / Unit Number</label>
                                 <input type="text" id="c-building-no" placeholder="e.g. Villa 12, Apt 305" dir="ltr">
                             </div>
                             <div class="form-group">
                                 <label>Floor</label>
-                                <input type="text" id="c-floor" placeholder="e.g. Third Floor">
+                                <select id="c-floor">
+                                    <option value="">Select Floor</option>
+                                    <option value="Ground Floor">Ground Floor</option>
+                                    <option value="First Floor">First Floor</option>
+                                    <option value="Second Floor">Second Floor</option>
+                                    <option value="Third Floor">Third Floor</option>
+                                    <option value="Fourth Floor">Fourth Floor</option>
+                                    <option value="Fifth Floor">Fifth Floor</option>
+                                    <option value="Sixth Floor">Sixth Floor</option>
+                                    <option value="Seventh Floor">Seventh Floor</option>
+                                    <option value="Eighth Floor">Eighth Floor</option>
+                                    <option value="Ninth Floor">Ninth Floor</option>
+                                    <option value="Tenth Floor">Tenth Floor</option>
+                                </select>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Nearby Landmark (Optional)</label>
-                            <input type="text" id="c-landmark" placeholder="e.g. next to Al Rahma Mosque">
                         </div>
 
                         <button type="submit" class="submit-btn" id="submit-btn">Continue — Complete Booking</button>
@@ -784,8 +672,9 @@
             const phoneInput = document.getElementById('c-phone');
             const emailInput = document.getElementById('c-email');
             [nameInput, phoneInput, emailInput].forEach(inp => inp.addEventListener('input', fillContract));
-            ['c-street','c-building-no','c-floor','c-landmark'].forEach(id => {
-                document.getElementById(id).addEventListener('input', fillContract);
+            ['c-street','c-building-no','c-floor'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', fillContract);
             });
         }
 
@@ -838,7 +727,6 @@
             if (p('c-street')) parts.push(p('c-street'));
             if (p('c-building-no')) parts.push(p('c-building-no'));
             if (p('c-floor')) parts.push(p('c-floor'));
-            if (p('c-landmark')) parts.push('next to ' + p('c-landmark'));
             return parts.join(' - ');
         }
 
@@ -895,7 +783,7 @@
                         email,
                         city: address,
                         contractNo: sessionStorage.getItem('tdContractNo'),
-                        contractBody: document.getElementById('summary-card').innerText,
+                        contractBody: "",
                         message: bookingSummary,
                         source: 'booking-' + (booking.serviceType || 'website')
                     })
