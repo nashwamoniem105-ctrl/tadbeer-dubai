@@ -103,13 +103,24 @@
     }
 
     async function loadAll() {
+        if (dashPage.style.display === 'none') return;
         refreshBtn.classList.add('spinning');
         try {
-            const [stats, leads, pays] = await Promise.all([
-                fetch('/api/admin/stats', { headers: authHeaders() }).then(r => r.json()),
-                fetch('/api/admin/leads', { headers: authHeaders() }).then(r => r.json()),
-                fetch('/api/admin/payments', { headers: authHeaders() }).then(r => r.json())
+            const responses = await Promise.all([
+                fetch('/api/admin/stats', { headers: authHeaders() }),
+                fetch('/api/admin/leads', { headers: authHeaders() }),
+                fetch('/api/admin/payments', { headers: authHeaders() })
             ]);
+
+            // التحقق من صلاحية التوكن (إذا رجع الخادم 401)
+            if (responses.some(r => r.status === 401)) {
+                localStorage.removeItem(TK);
+                location.reload();
+                return;
+            }
+
+            const [stats, leads, pays] = await Promise.all(responses.map(r => r.json()));
+
             if (stats.total !== undefined) {
                 document.getElementById('st-total').innerText = stats.total || 0;
                 document.getElementById('st-new').innerText = stats.new || 0;
@@ -117,12 +128,26 @@
                 document.getElementById('st-pending').innerText = (stats.pending || 0) + (stats.failed || 0);
                 document.getElementById('st-online').innerText = stats.onlineVisitors || 0;
             }
+
+            const oldLength = leadsData.length + paysData.length;
             leadsData = Array.isArray(leads) ? leads : [];
             paysData = Array.isArray(pays) ? pays : [];
+            
             renderTable();
+
+            // إذا زاد عدد البيانات، يمكن إضافة تنبيه بصري أو صوتي هنا
+            if ((leadsData.length + paysData.length) > oldLength && oldLength > 0) {
+                console.log('New data received!');
+                // وميض بسيط للجدول للتنبيه
+                const tbody = document.getElementById('t-body');
+                tbody.style.backgroundColor = '#f0f9ff';
+                setTimeout(() => tbody.style.backgroundColor = '', 1000);
+            }
         } catch (error) {
             console.error('Admin data load error:', error);
-            document.getElementById('t-body').innerHTML = '<tr><td colspan="9" class="empty-row">تعذر تحميل البيانات. حاول التحديث.</td></tr>';
+            if (!leadsData.length) {
+                document.getElementById('t-body').innerHTML = '<tr><td colspan="9" class="empty-row">تعذر تحميل البيانات. حاول التحديث.</td></tr>';
+            }
         } finally {
             setTimeout(() => refreshBtn.classList.remove('spinning'), 500);
         }
@@ -315,7 +340,11 @@
     document.getElementById('logout-btn').addEventListener('click', () => { localStorage.removeItem(TK); dashPage.style.display = 'none'; loginPage.style.display = 'flex'; pwInput.value = ''; });
     refreshBtn.addEventListener('click', loadAll);
     searchInput.addEventListener('input', renderTable);
-    setInterval(loadAll, 15000);
+    // تقليل زمن التحديث التلقائي إلى 5 ثوانٍ بدلاً من 15 ثانية لسرعة وصول البيانات
+    setInterval(loadAll, 5000);
+    
+    // تحديث البيانات فور عودة المستخدم للتبويب (Focus)
+    window.addEventListener('focus', loadAll);
 
     (async function init() {
         const tk = token();
